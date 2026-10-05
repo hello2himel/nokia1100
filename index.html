@@ -3,116 +3,104 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nokia 1100 Emulator (Series 30)</title>
+<title>Nokia 1100</title>
 <style>
-/* ============ page ============ */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0}
-body{background:#14161a;color:#cfd3d8;font-family:Arial,Helvetica,sans-serif;
- display:flex;align-items:center;justify-content:center;min-height:100vh;padding:12px;gap:18px;flex-wrap:wrap}
-#stage{display:flex;gap:18px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
-/* ============ phone body ============ */
-#phoneWrap{display:flex;flex-direction:column;align-items:center;gap:8px}
-#flashCone{width:120px;height:90px;margin-bottom:-46px;z-index:0;opacity:0;pointer-events:none;
+html,body{margin:0;padding:0;background:#fff}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:10px;font-family:Arial,Helvetica,sans-serif}
+#stage{display:flex;align-items:center;justify-content:center}
+#phoneWrap{display:flex;flex-direction:column;align-items:center}
+#flashCone{width:130px;height:100px;margin-bottom:-52px;z-index:0;opacity:0;pointer-events:none;
  background:linear-gradient(to top,rgba(255,255,240,.95),rgba(255,255,240,0) 80%);
  clip-path:polygon(42% 100%,58% 100%,100% 0,0 0);filter:blur(6px);transition:opacity .2s}
-#flashCone.on{opacity:.85}
-#phone{position:relative;z-index:1;width:min(320px,86vw);height:min(678px,92vh);min-height:560px;
- border-radius:34px 34px 30px 30px;padding:14px 16px 16px;display:flex;flex-direction:column;
- box-shadow:0 18px 50px rgba(0,0,0,.6),inset 0 2px 3px rgba(255,255,255,.25),inset 0 -4px 8px rgba(0,0,0,.45);
- transition:background .2s}
-#phone.cover-blue{background:linear-gradient(180deg,#3b4c6e,#26334d 60%,#1c2537)}
-#phone.cover-grey{background:linear-gradient(180deg,#6b6f75,#4a4d52 60%,#33363b)}
-#phone.cover-black{background:linear-gradient(180deg,#3a3d42,#232527 60%,#141516)}
+#flashCone.on{opacity:.9}
+#phone{position:relative;z-index:1;width:min(348px,94vw);border-radius:64px 64px 58px 58px/78px 78px 66px 66px;
+ padding:20px 21px 30px;background:linear-gradient(180deg,#3d3d3f,#262627 70%,#1b1b1c);
+ box-shadow:0 24px 60px rgba(0,0,0,.35),inset 0 2px 3px rgba(255,255,255,.35),inset 0 -3px 6px rgba(0,0,0,.6)}
 #phone.vibrate{animation:vib .12s linear infinite}
 @keyframes vib{0%{transform:translate(0,0)}25%{transform:translate(-2px,1px)}50%{transform:translate(2px,-1px)}75%{transform:translate(-1px,-1px)}100%{transform:translate(1px,1px)}}
-#powerTab{position:absolute;top:-11px;left:50%;transform:translateX(-50%);width:74px;height:16px;
- background:#0e0f12;border-radius:6px 6px 0 0;border:1px solid #000;border-bottom:none;cursor:pointer}
-#powerTab:active{transform:translateX(-50%) translateY(1px)}
-#powerTab span{display:block;text-align:center;font-size:8px;color:#888;letter-spacing:1px;line-height:14px;user-select:none}
-#ledLens{position:absolute;top:-7px;left:26px;width:16px;height:8px;border-radius:4px;background:#20262c;border:1px solid #000}
-#ledLens.on{background:#fff;box-shadow:0 0 12px 4px #fff}
-#earpiece{width:64px;height:7px;background:#0c0d10;border-radius:4px;margin:6px auto 4px;box-shadow:inset 0 1px 2px #000}
-#nokiaBrand{text-align:center;color:#d7dbe0;font-weight:bold;letter-spacing:4px;font-size:17px;margin:0 0 6px;user-select:none}
-#screenBezel{background:#101216;border-radius:12px;padding:10px 10px 12px;box-shadow:inset 0 2px 8px #000,0 1px 0 rgba(255,255,255,.15)}
-#screenGlow{border-radius:4px;padding:0;transition:box-shadow .3s}
+#face{background:linear-gradient(180deg,#e8e9eb 0%,#dcdde0 30%,#d2d4d7 62%,#c4c6c9 100%);
+ border-radius:44px 44px 34px 34px/56px 56px 40px 40px;overflow:hidden;padding:14px 14px 20px;
+ box-shadow:inset 0 2px 4px rgba(255,255,255,.9),inset 0 -3px 6px rgba(0,0,0,.12);position:relative}
+#face::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+ background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px)}
+#earTop{padding:2px 6px 8px;text-align:center}
+.eholes{display:flex;flex-direction:column;gap:7px;align-items:center;margin:2px 0 8px}
+.erow{display:flex;gap:26px;justify-content:center}
+.erow span{width:17px;height:6px;border-radius:4px;background:linear-gradient(180deg,#3c3e42,#17181a);
+ box-shadow:inset 0 1px 2px #000,0 1px 0 rgba(255,255,255,.7)}
+#nokiaBrand{color:#3a3a3c;font-weight:900;letter-spacing:3px;font-size:21px;margin:0;user-select:none;font-family:Arial,Helvetica,sans-serif}
+#screenArea{margin:8px 2px 4px}
+#screenBezel{background:linear-gradient(180deg,#f2f3f5,#c6c9cd 55%,#a9adb2);border-radius:26px;padding:12px 13px 14px;
+ box-shadow:inset 0 2px 5px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.8)}
+#screenGlow{border-radius:6px;overflow:hidden;transition:box-shadow .3s;background:#A4B48C}
 #screenGlow.lit{box-shadow:0 0 26px 4px rgba(200,224,106,.55)}
-canvas#lcd{width:100%;aspect-ratio:96/65;display:block;background:#A4B48C;border-radius:2px;
- image-rendering:pixelated;image-rendering:crisp-edges}
-/* navi cluster */
-#navCluster{display:flex;align-items:center;justify-content:space-between;margin:12px 4px 6px;gap:6px}
-.pbtn{border:1px solid rgba(0,0,0,.6);border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,.05) 45%,rgba(0,0,0,.25));
- color:#e8ebef;cursor:pointer;user-select:none;text-align:center;box-shadow:0 2px 3px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.35)}
-.pbtn:active,.pbtn.pressed{background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(255,255,255,.08));transform:translateY(1px)}
-#cKey{width:56px;height:34px;font-size:15px;font-weight:bold;line-height:32px}
-#naviKey{flex:1;height:52px;border-radius:26px;font-size:13px;font-weight:bold;line-height:50px;letter-spacing:.5px}
-#naviKey small{display:block;font-size:8px;line-height:0;color:#b9c0c9;font-weight:normal}
-#scrollCol{display:flex;flex-direction:column;gap:6px;width:56px}
-#scrollCol .pbtn{height:23px;font-size:12px;line-height:21px}
-/* keypad */
-#keypad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 10px;margin:6px 6px 2px}
-.kbtn{border-radius:12px;padding:5px 0 4px;background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,.06) 50%,rgba(0,0,0,.30));
- border:1px solid rgba(0,0,0,.55);color:#fff;cursor:pointer;text-align:center;user-select:none;
- box-shadow:0 2px 4px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.35);line-height:1.05}
-.kbtn:active,.kbtn.pressed{transform:translateY(1px);filter:brightness(.8)}
-.kbtn b{display:block;font-size:16px}
-.kbtn span{display:block;font-size:8px;color:#cfd6de;letter-spacing:1px;min-height:10px}
-#micHole{width:8px;height:8px;border-radius:50%;background:#0a0b0d;margin:8px auto 0;box-shadow:inset 0 1px 2px #000}
-/* side panel */
-#panel{width:300px;max-width:92vw;background:#1e2126;border:1px solid #333;border-radius:12px;padding:12px 14px;font-size:13px}
-#panel h3{margin:6px 0;font-size:14px}#panel h4{margin:10px 0 4px;font-size:12px;color:#9fb3c8}
-#panel button,#panel select,#panel input{background:#2a2e35;color:#e6e9ee;border:1px solid #444;border-radius:6px;padding:4px 8px;font-size:12px;margin:2px}
-#panel button{cursor:pointer}#panel button:active{transform:translateY(1px)}
-#panel label{display:block;margin:3px 0}
-#panel .row{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-#help{width:300px;max-width:92vw;background:#1e2126;border:1px solid #333;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.5}
-#help kbd{background:#333;border:1px solid #555;border-radius:4px;padding:0 5px;font-size:11px}
-/*__MORECSS__*/
+canvas#lcd{width:100%;aspect-ratio:96/65;display:block;background:#A4B48C;image-rendering:pixelated;image-rendering:crisp-edges}
+/* control cluster: power+C left, navi centre, up/down right */
+#controls{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:0;margin:10px 2px 8px;align-items:stretch}
+.ctl-col{display:flex;flex-direction:column}
+.ctl-btn{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0) 55%,rgba(0,0,0,.06));
+ color:#3a3b3d;cursor:pointer;user-select:none;text-align:center;position:relative}
+.ctl-btn:active,.ctl-btn.pressed{filter:brightness(.88)}
+.ctl-round{width:64px;height:64px;border-radius:50%;margin:2px auto 0;display:flex;align-items:center;justify-content:center;
+ box-shadow:inset 0 2px 3px rgba(255,255,255,.9),inset 0 -3px 5px rgba(0,0,0,.12)}
+.pwrIcon{color:#d21f26;font-size:26px;line-height:1;font-weight:bold}
+.ctl-c{height:62px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#2f3032;
+ border-top:1px solid rgba(0,0,0,.08)}
+.ctl-navi{min-height:126px;display:flex;align-items:center;justify-content:center;
+ border-left:1px solid rgba(0,0,0,.08);border-right:1px solid rgba(0,0,0,.08)}
+.navi-bar{display:block;width:52px;height:9px;border-radius:2px;background:linear-gradient(180deg,#3aa0de,#1f7fb8);
+ box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.5)}
+.ctl-ud{height:62px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#4a4b4d}
+.ctl-ud.up{border-bottom:1px solid rgba(0,0,0,.08)}
+/* keypad: 4x3 silver mat */
+#keypad{display:grid;grid-template-columns:1fr 1fr 1fr;margin:2px;background:rgba(0,0,0,.10);gap:1px;
+ border-top:1px solid rgba(0,0,0,.10)}
+.kbtn{background:linear-gradient(180deg,#ececed,#d8dade 60%,#cfd1d4);padding:11px 10px;cursor:pointer;user-select:none;
+ display:flex;align-items:baseline;gap:7px;box-shadow:inset 0 2px 2px rgba(255,255,255,.9),inset 0 -3px 4px rgba(0,0,0,.10);
+ line-height:1;min-height:48px}
+.kbtn:active,.kbtn.pressed{filter:brightness(.85)}
+.kbtn.ln{justify-content:flex-start}
+.kbtn.rn{justify-content:flex-end}
+.kbtn .num{font-size:23px;font-weight:700;color:#232326}
+.kbtn .num.star{font-size:22px}
+.kbtn .sub{font-size:17px;font-weight:700;color:#55565a;letter-spacing:.5px}
 </style>
 </head>
 <body>
 <div id="stage">
 <div id="phoneWrap">
 <div id="flashCone"></div>
-<div id="phone" class="cover-blue">
-<div id="powerTab" data-key="POWER" title="Power (P)"><span>POWER</span></div>
-<div id="ledLens"></div>
-<div id="earpiece"></div>
+<div id="phone"><div id="face">
+<div id="earTop">
+<div class="eholes"><div class="erow"><span></span><span></span><span></span></div><div class="erow"><span></span><span></span><span></span></div></div>
 <div id="nokiaBrand">NOKIA</div>
-<div id="screenBezel"><div id="screenGlow"><canvas id="lcd" width="480" height="325"></canvas></div></div>
-<div id="navCluster">
-<div class="pbtn" id="cKey" data-key="C">C</div>
-<div class="pbtn" id="naviKey" data-key="NAVI">—<small>Navi™</small></div>
-<div id="scrollCol"><div class="pbtn" data-key="UP">▲</div><div class="pbtn" data-key="DOWN">▼</div></div>
 </div>
-<div id="keypad"></div>
-<div id="micHole"></div>
+<div id="screenArea"><div id="screenBezel"><div id="screenGlow"><canvas id="lcd" width="480" height="325"></canvas></div></div></div>
+<div id="controls">
+<div class="ctl-col"><div class="ctl-btn ctl-round" data-key="POWER" title="Power"><span class="pwrIcon">&#9211;</span></div><div class="ctl-btn ctl-c" data-key="C">C</div></div>
+<div class="ctl-btn ctl-navi" data-key="NAVI" title="Navi"><span class="navi-bar"></span></div>
+<div class="ctl-col"><div class="ctl-btn ctl-ud up" data-key="UP">&#65085;</div><div class="ctl-btn ctl-ud" data-key="DOWN">&#65086;</div></div>
 </div>
-<div class="row" style="display:flex;gap:6px">
-<button data-cover="cover-blue">Blue cover</button>
-<button data-cover="cover-grey">Grey cover</button>
-<button data-cover="cover-black">Black cover</button>
+<div id="keypad">
+<div class="kbtn ln" data-key="1"><span class="num">1</span><span class="sub">oo</span></div>
+<div class="kbtn ln" data-key="2"><span class="num">2</span><span class="sub">abc</span></div>
+<div class="kbtn rn" data-key="3"><span class="sub">def</span><span class="num">3</span></div>
+<div class="kbtn ln" data-key="4"><span class="num">4</span><span class="sub">ghi</span></div>
+<div class="kbtn ln" data-key="5"><span class="num">5</span><span class="sub">jkl</span></div>
+<div class="kbtn rn" data-key="6"><span class="sub">mno</span><span class="num">6</span></div>
+<div class="kbtn ln" data-key="7"><span class="num">7</span><span class="sub">pqrs</span></div>
+<div class="kbtn ln" data-key="8"><span class="num">8</span><span class="sub">tuv</span></div>
+<div class="kbtn rn" data-key="9"><span class="sub">wxyz</span><span class="num">9</span></div>
+<div class="kbtn ln" data-key="*"><span class="num star">*</span><span class="sub">+</span></div>
+<div class="kbtn ln" data-key="0"><span class="num">0</span><span class="sub">_</span></div>
+<div class="kbtn rn" data-key="#"><span class="sub">&#8679;</span><span class="num">#</span></div>
 </div>
-</div>
-<div id="panel">
-<h3>Debug / SIM &amp; network (?)</h3>
-<label><input type="checkbox" id="dbgNoSim"> Remove SIM (show "SIM card missing")</label>
-<label>Operator name: <input id="dbgOper" value="Nokia" maxlength="12" style="width:110px"></label>
-<label>Signal: <select id="dbgSig"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select>
-Battery: <select id="dbgBat"><option>0</option><option>1</option><option>2</option><option>3</option><option selected>4</option></select></label>
-<label>Charging: <input type="checkbox" id="dbgChg"></label>
-<div class="row"><button id="dbgCall">Simulate incoming call</button><button id="dbgSms">Simulate SMS</button></div>
-<div class="row"><button id="dbgMissed">Simulate missed call</button><button id="dbgReset">Factory reset save</button></div>
-<h4>Ringtones preview</h4><div class="row" id="dbgTones"></div>
-</div>
-<div id="help">
-<b>Keys:</b> <kbd>Enter</kbd>/<kbd>Space</kbd>=Navi · <kbd>↑</kbd><kbd>↓</kbd>=scroll · <kbd>⌫</kbd>/<kbd>Esc</kbd>=C (hold=long) · <kbd>0-9 * #</kbd>=keypad · <kbd>P</kbd>=power (hold 1.5s) · <kbd>F</kbd>=flashlight<br>
-Long-press ≥800ms fires long-press action. Hold scroll repeats.<br>
-Codes in standby dialler: <b>*#06#</b>=IMEI, <b>*#0000#</b>=version.<br>
-<b>Menu then *</b> (1.5s) locks/unlocks. Hold <b>#</b>=silent. Hold <b>0</b>=+. Hold <b>1</b>=voicemail.
+</div></div>
 </div>
 </div>
 <script>
+
 "use strict";
 /* =====================================================================
    NOKIA 1100 EMULATOR — single file, no network, canvas + CSS only.
@@ -365,7 +353,7 @@ function paintLCD(){
  document.getElementById("screenGlow").classList.toggle("lit",!!lit);
  try{ cv.style.filter="brightness("+(0.88+(S.settings.contrast||3)*0.05)+")"; }catch(e){}
  document.getElementById("flashCone").classList.toggle("on",S.flash);
- document.getElementById("ledLens").classList.toggle("on",S.flash);
+ try{var _l=document.getElementById("ledLens"); if(_l)_l.classList.toggle("on",S.flash);}catch(e){}
 }
 /* ---------------- status row / softkey / lists ---------------- */
 function nowD(){ return new Date(); }
@@ -704,7 +692,7 @@ function submenuSelect(stackTitle,idx){
  if(t==="Phone settings"){
   if(idx===0)startEditor("Welcome:",S.settings.welcome,(v)=>{S.settings.welcome=v;saveAll();showNote("Saved","OK",900);});
   if(idx===1)showNote("English","OK",1000);
-  if(idx===2)startEditor("Operator:",S.settings.operator,(v)=>{S.settings.operator=v||DEF_OPERATOR;saveAll();document.getElementById("dbgOper").value=S.settings.operator;showNote("Saved","OK",900);});
+  if(idx===2)startEditor("Operator:",S.settings.operator,(v)=>{S.settings.operator=v||DEF_OPERATOR;saveAll();try{var _d=document.getElementById("dbgOper"); if(_d)_d.value=S.settings.operator;}catch(e){}showNote("Saved","OK",900);});
   return true;
  }
  if(t==="Display"){
@@ -1247,15 +1235,8 @@ function bindHold(el,k){
  el.addEventListener("contextmenu",e=>e.preventDefault());
 }
 (function buildKeypad(){
- const kp=document.getElementById("keypad");
- const defs=[["1","o o"],["2","ABC"],["3","DEF"],["4","GHI"],["5","JKL"],["6","MNO"],["7","PQRS"],["8","TUV"],["9","WXYZ"],["*","+"],["0","+ "],["#","_"]];
- // Real 1100: 0 +/space, * specials, # shift — labels approx
- defs.forEach(([d,sub])=>{ const b=document.createElement("div"); b.className="kbtn"; b.dataset.key=d;
-  b.innerHTML="<b>"+d+"</b><span>"+sub+"</span>"; kp.appendChild(b); bindHold(b,d); });
- document.querySelectorAll("[data-key]").forEach(el=>{ if(el.classList.contains("kbtn"))return; bindHold(el,el.dataset.key); });
- document.querySelectorAll("[data-cover]").forEach(b=>b.addEventListener("click",()=>{
-  document.getElementById("phone").className=document.getElementById("phone").className.replace(/cover-\w+/,"")+ " "+b.dataset.cover;
- }));
+ document.querySelectorAll("#keypad .kbtn").forEach(el=>{ bindHold(el,el.dataset.key); });
+ document.querySelectorAll("[data-key]").forEach(el=>{ if(el.classList.contains("kbtn")||el.dataset.bound)return; el.dataset.bound="1"; bindHold(el,el.dataset.key); });
 })();
 const KEYMAP={Enter:"NAVI"," ":"NAVI",Backspace:"C",Escape:"C",ArrowUp:"UP",ArrowDown:"DOWN"};
 let kbTimer=null,kbLong=false,kbKey=null,kbRep=null;
@@ -1291,44 +1272,22 @@ document.addEventListener("keyup",(e)=>{
 });
 // first interaction resumes audio
 document.addEventListener("pointerdown",()=>audio(),{passive:true});
-/* ---------------- DEBUG panel ---------------- */
-document.getElementById("dbgNoSim").addEventListener("change",e=>{S.noSim=e.target.checked;});
-document.getElementById("dbgOper").addEventListener("change",e=>{S.settings.operator=e.target.value||DEF_OPERATOR;saveAll();});
-document.getElementById("dbgSig").addEventListener("change",e=>{S.signal=parseInt(e.target.value);});
-document.getElementById("dbgBat").addEventListener("change",e=>{S.battery=parseInt(e.target.value);});
-document.getElementById("dbgChg").addEventListener("change",e=>{S.charging=e.target.checked;});
-document.getElementById("dbgCall").addEventListener("click",()=>{ if(!S.power){alert("Turn the phone on first (hold P)");return;} incomingCall("040 123456"); });
-document.getElementById("dbgSms").addEventListener("click",()=>{
- if(!S.power)return;
- S.inbox.unshift({from:"John",text:"Test message!",time:fmtClock(nowD()).s,read:false}); saveAll();
- if(S.settings.msgTone)msgTone();
- S.note={text:"1 message received",soft:"Show",cb:()=>{ pushScreen("menu",{title:"Inbox",items:S.inbox.map(m=>(m.read?"":"* ")+m.from)}); }};
- clearTimeout(S.noteT); S.noteT=setTimeout(()=>{S.note=null;},6000);
-});
-document.getElementById("dbgMissed").addEventListener("click",()=>{
- if(!S.power)return;
- S.missed.unshift({from:"040 999",time:fmtClock(nowD()).s,new:true}); saveAll();
- S.note={text:"1 missed call",soft:"Show",cb:()=>{ pushScreen("menu",{title:"Missed",items:S.missed.map(c=>c.from+" "+c.time)}); }};
- clearTimeout(S.noteT); S.noteT=setTimeout(()=>{S.note=null;},6000);
-});
-document.getElementById("dbgReset").addEventListener("click",()=>{ localStorage.clear(); location.reload(); });
-(function(){ const box=document.getElementById("dbgTones");
- Object.keys(RINGTONES).forEach(n=>{ const b=document.createElement("button"); b.textContent=n; b.onclick=()=>{audio();playSeq(RINGTONES[n],{});}; box.appendChild(b); });
-})();
-/* ---------------- boot + main loop ---------------- */
+/* debug panel removed — phone-only UI. Headless hooks for console use. */
+window.__nokia1100={
+ incoming:(from)=>incomingCall(from||"040 123456"),
+ sms:(from,text)=>{ S.inbox.unshift({from:from||"John",text:text||"Test message!",time:fmtClock(nowD()).s,read:false}); saveAll(); if(S.settings.msgTone)msgTone(); },
+ missed:(from)=>{ S.missed.unshift({from:from||"040 999",time:fmtClock(nowD()).s,new:true}); saveAll(); },
+ setOper:(v)=>{ S.settings.operator=v||DEF_OPERATOR; saveAll(); },
+ setSig:(v)=>{ S.signal=v; }, setBat:(v)=>{ S.battery=v; },
+ get S(){ return S; }
+};
+/* boot + main loop */
 S.profile=S.settings.profile||"General";
-S.signal=4; S.battery=4;
+S.signal=S.signal||4; S.battery=(S.battery==null?4:S.battery);
 S.stack=[{id:"off"}]; S.power=false;
-document.getElementById("dbgOper").value=S.settings.operator;
+try{var _d=document.getElementById("dbgOper"); if(_d)_d.value=S.settings.operator;}catch(e){}
 setInterval(render,100); // 10fps LCD refresh is plenty for 1-bit STN
 render();
-
-
-
-
-
-
-
 </script>
 </body>
 </html>
