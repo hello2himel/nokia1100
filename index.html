@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nokia 1100 Emulator (Series 30)</title>
+<style>
+/* ============ page ============ */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:#14161a;color:#cfd3d8;font-family:Arial,Helvetica,sans-serif;
+ display:flex;align-items:center;justify-content:center;min-height:100vh;padding:12px;gap:18px;flex-wrap:wrap}
+#stage{display:flex;gap:18px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+/* ============ phone body ============ */
+#phoneWrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+#flashCone{width:120px;height:90px;margin-bottom:-46px;z-index:0;opacity:0;pointer-events:none;
+ background:linear-gradient(to top,rgba(255,255,240,.95),rgba(255,255,240,0) 80%);
+ clip-path:polygon(42% 100%,58% 100%,100% 0,0 0);filter:blur(6px);transition:opacity .2s}
+#flashCone.on{opacity:.85}
+#phone{position:relative;z-index:1;width:min(320px,86vw);height:min(678px,92vh);min-height:560px;
+ border-radius:34px 34px 30px 30px;padding:14px 16px 16px;display:flex;flex-direction:column;
+ box-shadow:0 18px 50px rgba(0,0,0,.6),inset 0 2px 3px rgba(255,255,255,.25),inset 0 -4px 8px rgba(0,0,0,.45);
+ transition:background .2s}
+#phone.cover-blue{background:linear-gradient(180deg,#3b4c6e,#26334d 60%,#1c2537)}
+#phone.cover-grey{background:linear-gradient(180deg,#6b6f75,#4a4d52 60%,#33363b)}
+#phone.cover-black{background:linear-gradient(180deg,#3a3d42,#232527 60%,#141516)}
+#phone.vibrate{animation:vib .12s linear infinite}
+@keyframes vib{0%{transform:translate(0,0)}25%{transform:translate(-2px,1px)}50%{transform:translate(2px,-1px)}75%{transform:translate(-1px,-1px)}100%{transform:translate(1px,1px)}}
+#powerTab{position:absolute;top:-11px;left:50%;transform:translateX(-50%);width:74px;height:16px;
+ background:#0e0f12;border-radius:6px 6px 0 0;border:1px solid #000;border-bottom:none;cursor:pointer}
+#powerTab:active{transform:translateX(-50%) translateY(1px)}
+#powerTab span{display:block;text-align:center;font-size:8px;color:#888;letter-spacing:1px;line-height:14px;user-select:none}
+#ledLens{position:absolute;top:-7px;left:26px;width:16px;height:8px;border-radius:4px;background:#20262c;border:1px solid #000}
+#ledLens.on{background:#fff;box-shadow:0 0 12px 4px #fff}
+#earpiece{width:64px;height:7px;background:#0c0d10;border-radius:4px;margin:6px auto 4px;box-shadow:inset 0 1px 2px #000}
+#nokiaBrand{text-align:center;color:#d7dbe0;font-weight:bold;letter-spacing:4px;font-size:17px;margin:0 0 6px;user-select:none}
+#screenBezel{background:#101216;border-radius:12px;padding:10px 10px 12px;box-shadow:inset 0 2px 8px #000,0 1px 0 rgba(255,255,255,.15)}
+#screenGlow{border-radius:4px;padding:0;transition:box-shadow .3s}
+#screenGlow.lit{box-shadow:0 0 26px 4px rgba(200,224,106,.55)}
+canvas#lcd{width:100%;aspect-ratio:96/65;display:block;background:#A4B48C;border-radius:2px;
+ image-rendering:pixelated;image-rendering:crisp-edges}
+/* navi cluster */
+#navCluster{display:flex;align-items:center;justify-content:space-between;margin:12px 4px 6px;gap:6px}
+.pbtn{border:1px solid rgba(0,0,0,.6);border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,.05) 45%,rgba(0,0,0,.25));
+ color:#e8ebef;cursor:pointer;user-select:none;text-align:center;box-shadow:0 2px 3px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.35)}
+.pbtn:active,.pbtn.pressed{background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(255,255,255,.08));transform:translateY(1px)}
+#cKey{width:56px;height:34px;font-size:15px;font-weight:bold;line-height:32px}
+#naviKey{flex:1;height:52px;border-radius:26px;font-size:13px;font-weight:bold;line-height:50px;letter-spacing:.5px}
+#naviKey small{display:block;font-size:8px;line-height:0;color:#b9c0c9;font-weight:normal}
+#scrollCol{display:flex;flex-direction:column;gap:6px;width:56px}
+#scrollCol .pbtn{height:23px;font-size:12px;line-height:21px}
+/* keypad */
+#keypad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 10px;margin:6px 6px 2px}
+.kbtn{border-radius:12px;padding:5px 0 4px;background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,.06) 50%,rgba(0,0,0,.30));
+ border:1px solid rgba(0,0,0,.55);color:#fff;cursor:pointer;text-align:center;user-select:none;
+ box-shadow:0 2px 4px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.35);line-height:1.05}
+.kbtn:active,.kbtn.pressed{transform:translateY(1px);filter:brightness(.8)}
+.kbtn b{display:block;font-size:16px}
+.kbtn span{display:block;font-size:8px;color:#cfd6de;letter-spacing:1px;min-height:10px}
+#micHole{width:8px;height:8px;border-radius:50%;background:#0a0b0d;margin:8px auto 0;box-shadow:inset 0 1px 2px #000}
+/* side panel */
+#panel{width:300px;max-width:92vw;background:#1e2126;border:1px solid #333;border-radius:12px;padding:12px 14px;font-size:13px}
+#panel h3{margin:6px 0;font-size:14px}#panel h4{margin:10px 0 4px;font-size:12px;color:#9fb3c8}
+#panel button,#panel select,#panel input{background:#2a2e35;color:#e6e9ee;border:1px solid #444;border-radius:6px;padding:4px 8px;font-size:12px;margin:2px}
+#panel button{cursor:pointer}#panel button:active{transform:translateY(1px)}
+#panel label{display:block;margin:3px 0}
+#panel .row{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+#help{width:300px;max-width:92vw;background:#1e2126;border:1px solid #333;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.5}
+#help kbd{background:#333;border:1px solid #555;border-radius:4px;padding:0 5px;font-size:11px}
+/*__MORECSS__*/
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="phoneWrap">
+<div id="flashCone"></div>
+<div id="phone" class="cover-blue">
+<div id="powerTab" data-key="POWER" title="Power (P)"><span>POWER</span></div>
+<div id="ledLens"></div>
+<div id="earpiece"></div>
+<div id="nokiaBrand">NOKIA</div>
+<div id="screenBezel"><div id="screenGlow"><canvas id="lcd" width="480" height="325"></canvas></div></div>
+<div id="navCluster">
+<div class="pbtn" id="cKey" data-key="C">C</div>
+<div class="pbtn" id="naviKey" data-key="NAVI">—<small>Navi™</small></div>
+<div id="scrollCol"><div class="pbtn" data-key="UP">▲</div><div class="pbtn" data-key="DOWN">▼</div></div>
+</div>
+<div id="keypad"></div>
+<div id="micHole"></div>
+</div>
+<div class="row" style="display:flex;gap:6px">
+<button data-cover="cover-blue">Blue cover</button>
+<button data-cover="cover-grey">Grey cover</button>
+<button data-cover="cover-black">Black cover</button>
+</div>
+</div>
+<div id="panel">
+<h3>Debug / SIM &amp; network (?)</h3>
+<label><input type="checkbox" id="dbgNoSim"> Remove SIM (show "SIM card missing")</label>
+<label>Operator name: <input id="dbgOper" value="Nokia" maxlength="12" style="width:110px"></label>
+<label>Signal: <select id="dbgSig"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select>
+Battery: <select id="dbgBat"><option>0</option><option>1</option><option>2</option><option>3</option><option selected>4</option></select></label>
+<label>Charging: <input type="checkbox" id="dbgChg"></label>
+<div class="row"><button id="dbgCall">Simulate incoming call</button><button id="dbgSms">Simulate SMS</button></div>
+<div class="row"><button id="dbgMissed">Simulate missed call</button><button id="dbgReset">Factory reset save</button></div>
+<h4>Ringtones preview</h4><div class="row" id="dbgTones"></div>
+</div>
+<div id="help">
+<b>Keys:</b> <kbd>Enter</kbd>/<kbd>Space</kbd>=Navi · <kbd>↑</kbd><kbd>↓</kbd>=scroll · <kbd>⌫</kbd>/<kbd>Esc</kbd>=C (hold=long) · <kbd>0-9 * #</kbd>=keypad · <kbd>P</kbd>=power (hold 1.5s) · <kbd>F</kbd>=flashlight<br>
+Long-press ≥800ms fires long-press action. Hold scroll repeats.<br>
+Codes in standby dialler: <b>*#06#</b>=IMEI, <b>*#0000#</b>=version.<br>
+<b>Menu then *</b> (1.5s) locks/unlocks. Hold <b>#</b>=silent. Hold <b>0</b>=+. Hold <b>1</b>=voicemail.
+</div>
+</div>
+<script>
+"use strict";
+/* =====================================================================
+   NOKIA 1100 EMULATOR — single file, no network, canvas + CSS only.
+   (?) marks defaults that are easy to change (per task brief).
+   ===================================================================== */
+const W=96,H=65;
+const SCALE_DEFAULT=5; // (?) integer scaling 5x => 480x325
+// (?) LCD colours
+const COL_OFF="#A4B48C", COL_ON="#1B2415", COL_BL="#C8E06A";
+// (?) timeouts
+const BACKLIGHT_STANDBY_MS=15000; // backlight off after 15s inactivity
+const BACKLIGHT_MENU_MS=10000;    // (?) 10s in menus
+const MENU_IDLE_MS=60000;         // menus return to standby after 60s
+// const MENU_IDLE_MS_ALT=30000;   // (?) alt 30s — change above to use
+const LONG_MS=800;               // (?) long-press threshold
+const POWER_LONG_MS=1500;
+const KEYGUARD_WINDOW_MS=1500;   // Menu then * window
+const MARQUEE_MS=350;
+// (?) defaults
+const DEF_OPERATOR="Nokia"; // (?) brief suggested "Network"; using "Nokia"
+const DEF_IMEI="351234567890123"; // (?)
+const DEF_SW="V 4.24\n03-12-04\nRH-18\n(c) NMP"; // (?)
+const DEF_PIN="1234";       // (?)
+const DEF_PUK="12345678";   // (?)
+const DEF_SEC="12345";
+const DEF_VMBOX="";         // voice mailbox default empty
+/* ---------------- framebuffer ---------------- */
+const fb=new Uint8Array(W*H);
+function px(x,y,v){ if(x<0||y<0||x>=W||y>=H)return; fb[y*W+x]=v?1:0; }
+function clearFB(v=0){ fb.fill(v?1:0); }
+function fillRect(x,y,w,h,v){ for(let j=0;j<h;j++)for(let i=0;i<w;i++)px(x+i,y+j,v); }
+function invertRect(x,y,w,h){ for(let j=0;j<h;j++)for(let i=0;i<w;i++){ const X=x+i,Y=y+j; if(X<0||Y<0||X>=W||Y>=H)continue; fb[Y*W+X]^=1; } }
+/* ---------------- bitmap font (Nokia-style 5x7, proportional) ---------------- */
+// Each glyph: array of 7 row strings ("1"=pixel). Advance = max width+1.
+const G={
+"A":["01110","10001","10001","11111","10001","10001","10001"],
+"B":["11110","10001","10001","11110","10001","10001","11110"],
+"C":["01110","10001","10000","10000","10000","10001","01110"],
+"D":["11100","10010","10001","10001","10001","10010","11100"],
+"E":["11111","10000","10000","11110","10000","10000","11111"],
+"F":["11111","10000","10000","11110","10000","10000","10000"],
+"G":["01110","10001","10000","10111","10001","10001","01111"],
+"H":["10001","10001","10001","11111","10001","10001","10001"],
+"I":["01110","00100","00100","00100","00100","00100","01110"],
+"J":["00111","00010","00010","00010","00010","10010","01100"],
+"K":["10001","10010","10100","11000","10100","10010","10001"],
+"L":["10000","10000","10000","10000","10000","10000","11111"],
+"M":["10001","11011","10101","10101","10001","10001","10001"],
+"N":["10001","11001","10101","10011","10001","10001","10001"],
+"O":["01110","10001","10001","10001","10001","10001","01110"],
+"P":["11110","10001","10001","11110","10000","10000","10000"],
+"Q":["01110","10001","10001","10001","10101","10010","01101"],
+"R":["11110","10001","10001","11110","10100","10010","10001"],
+"S":["01111","10000","10000","01110","00001","00001","11110"],
+"T":["11111","00100","00100","00100","00100","00100","00100"],
+"U":["10001","10001","10001","10001","10001","10001","01110"],
+"V":["10001","10001","10001","10001","10001","01010","00100"],
+"W":["10001","10001","10001","10101","10101","11011","10001"],
+"X":["10001","10001","01010","00100","01010","10001","10001"],
+"Y":["10001","10001","01010","00100","00100","00100","00100"],
+"Z":["11111","00001","00010","00100","01000","10000","11111"],
+"0":["01110","10001","10011","10101","11001","10001","01110"],
+"1":["00100","01100","00100","00100","00100","00100","01110"],
+"2":["01110","10001","00001","00010","00100","01000","11111"],
+"3":["11111","00010","00100","00010","00001","10001","01110"],
+"4":["00010","00110","01010","10010","11111","00010","00010"],
+"5":["11111","10000","11110","00001","00001","10001","01110"],
+"6":["00110","01000","10000","11110","10001","10001","01110"],
+"7":["11111","00001","00010","00100","01000","01000","01000"],
+"8":["01110","10001","10001","01010","10001","10001","01110"],
+"9":["01110","10001","10001","01111","00001","00010","01100"],
+".":["","","","","","11","11"],
+",":["","","","","11","11","10"],
+":":["","1","","","","1",""],
+";":["","1","","","1","1","10"],
+"!":["1","1","1","1","1","","1"],
+"?":["1110","0001","0010","0100","0100","","0100"],
+"+":["","00100","00100","11111","00100","00100",""],
+"-":["","","","","11111","",""],
+"*":["","10101","01110","11111","01110","10101",""],
+"/":["00001","00010","00010","00100","01000","01000","10000"],
+"#":["01010","01010","11111","01010","11111","01010","01010"],
+"(" :["00010","00100","01000","01000","01000","00100","00010"],
+")":["01000","00100","00010","00010","00010","00100","01000"],
+"@":["01110","10001","10111","10101","10111","10000","01110"],
+"_":["","","","","","","11111"],
+'"':["101","101","","","","",""],
+"'":["1","1","","","","",""],
+"=":["","","11111","","11111","",""],
+"<":["00010","00100","01000","00100","00010","00100","00010"],
+">":["01000","00100","00010","00100","01000","00100","01000"],
+"%":["11001","11010","00010","00100","01000","01011","10011"],
+" ":["","","","","","",""],
+":2":["","","","","","",""],"$":[ "01110","10101","10100","01110","00101","10101","01110"],
+"&":["01100","10010","10100","01000","10101","10010","01101"],
+";2":["","1","","","","1",""],
+};
+function glyphOf(ch){
+ if(G[ch])return G[ch];
+ const u=ch.toUpperCase(); if(G[u])return G[u]; // (?) lowercase maps to caps
+ return ["111","101","101","101","101","101","111"]; // fallback box
+}
+function glyphW(g){ let w=0; for(const r of g)w=Math.max(w,r.length); return w; }
+function textW(s){ let w=0; for(const ch of s){ w+=glyphW(glyphOf(ch))+1; } return w? w-1:0; }
+function drawChar(x,y,ch,inv=false){
+ const g=glyphOf(ch);
+ for(let r=0;r<7;r++){ const row=g[r]||"";
+  for(let c=0;c<row.length;c++){ if(row[c]==="1"){ if(inv){px(x+c,y+r,0);} else px(x+c,y+r,1);} else { if(inv)px(x+c,y+r,1); } }
+ }
+ // descender clearance handled by 7px cell (3-4px descenders fit rows 5-6)
+ return glyphW(g)+1;
+}
+function drawText(x,y,s,inv=false){
+ if(inv){ const w=textW(s); fillRect(x-1,y-1,w+2,9,1); }
+ for(const ch of s){ x+=drawChar(x,y,ch,inv); }
+ return x;
+}
+function drawTextC(y,s,inv=false){ const w=textW(s); drawText(Math.max(0,Math.floor((W-w)/2)),y,s,inv); }
+function drawTextR(xRight,y,s,inv=false){ drawText(xRight-textW(s),y,s,inv); }
+/* ---------------- large digit font 10x16 (hand-coded) ---------------- */
+const LD={
+"0":["0011111100","0111111110","1100000011","1100000011","1100000111","1100001111","1100011111","1100111111","1101110011","1111100011","1111000011","1110000011","1100000011","0111111110","0011111100","0000000000"],
+"1":["0000110000","0001110000","0011110000","0001110000","0001110000","0001110000","0001110000","0001110000","0001110000","0001110000","0001110000","0001110000","0001110000","0011111100","0011111100","0000000000"],
+"2":["0011111100","0111111110","1100000011","0000000011","0000000111","0000001110","0000011100","0000111000","0001110000","0011100000","0111000000","1110000000","1111111111","1111111111","1111111111","0000000000"],
+"3":["0111111110","0111111110","0000000111","0000000011","0000000011","0000011110","0000011110","0000000011","0000000011","0000000011","0000000011","0000000011","1100000011","0111111110","0011111100","0000000000"],
+"4":["0000001100","0000011100","0000111100","0001111100","0011011100","0110011100","1100011100","1111111111","1111111111","0000011100","0000011100","0000011100","0000011100","0000011100","0000011100","0000000000"],
+"5":["1111111111","1111111111","1100000000","1100000000","1111111100","1111111110","0000000111","0000000011","0000000011","0000000011","0000000011","0000000011","1100000011","0111111110","0011111100","0000000000"],
+"6":["0001111100","0011111100","0111000000","1110000000","1100000000","1111111100","1111111110","1100000111","1100000011","1100000011","1100000011","1100000011","1100000011","0111111110","0011111100","0000000000"],
+"7":["1111111111","1111111111","0000000111","0000000011","0000001110","0000011100","0000111000","0001110000","0001110000","0001110000","0001110000","0001110000","0001110000","0001110000","0001110000","0000000000"],
+"8":["0011111100","0111111110","1100000011","1100000011","1100000011","0111111110","0011111100","0111111110","1100000011","1100000011","1100000011","1100000011","1100000011","0111111110","0011111100","0000000000"],
+"9":["0011111100","0111111110","1100000011","1100000011","1100000011","1100000011","1110000111","0111111111","0011111111","0000000011","0000000111","0000011110","0000111100","0011111000","0001110000","0000000000"],
+"+":["0000000000","0000110000","0000110000","0000110000","0111111100","0111111100","0000110000","0000110000","0000110000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000"],
+"-":["0000000000","0000000000","0000000000","0000000000","0111111100","0111111100","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000"],
+"*":["0000000000","0110001100","0110001100","0011111000","0001110000","0011111000","0110001100","0110001100","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000"],
+"#":["0000000000","0110011000","0110011000","1111111100","0110011000","1111111100","0110011000","0110011000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000"],
+" ":["0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000"],
+"p":["0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0001111000","0001111000","0000000000"],
+"m":["0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0000000000","0111011000","0111011000","0000000000"],
+};
+function largeW(s){ return s.length*11-1; }
+function drawLarge(x,y,s){
+ for(const ch of s){ const g=LD[ch]||LD[" "];
+  for(let r=0;r<16;r++){ const row=g[r]||"";
+   for(let c=0;c<10;c++) if(row[c]==="1")px(x+c,y+r,1);
+  }
+  x+=11;
+ }
+}
+/* ---------------- AUDIO (WebAudio, square/triangle only) ---------------- */
+let AC=null, ringNodes=null, ringTimer=null, msgNodes=[];
+function audio(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC&&AC.state==="suspended")AC.resume(); return AC; }
+function beep(freq=880,durMs=35,type="square",vol=0.12,when=0){
+ const ac=audio(); if(!ac)return;
+ const t=ac.currentTime+when;
+ const o=ac.createOscillator(), g=ac.createGain();
+ o.type=type; o.frequency.value=freq;
+ g.gain.setValueAtTime(0.0001,t);
+ g.gain.linearRampToValueAtTime(vol,t+0.005);
+ g.gain.exponentialRampToValueAtTime(0.0001,t+durMs/1000);
+ o.connect(g).connect(ac.destination); o.start(t); o.stop(t+durMs/1000+0.02);
+}
+const KEYFREQ={NAVI:880,C:660,UP:990,DOWN:750,POWER:440,"1":700,"2":760,"3":820,"4":880,"5":940,"6":1000,"7":1060,"8":1120,"9":1180,"*":600,"0":520,"#":540};
+function keyBeep(k){ if(!S.settings.keypadTones)return; beep(KEYFREQ[k]||880,35,"square",0.08); }
+function NF(n){ const m={C:0,"C#":1,D:2,"D#":3,E:4,F:5,"F#":6,G:7,"G#":8,A:9,"A#":10,B:11};
+ const mm=n.match(/^([A-G]#?)(\d)$/); if(!mm)return 440;
+ return 440*Math.pow(2,((m[mm[1]]-9)/12)+(parseInt(mm[2])-4)); }
+// Nokia tune opening phrase (Gran Vals), ~150bpm feel. (?) rhythm approximated.
+const NOKIA_TUNE=[["E5",.22],["D5",.22],["F#4",.44],["G#4",.44],["C#5",.22],["B4",.22],["D4",.44],["E4",.44],["B4",.22],["A4",.22],["C#4",.44],["E4",.44],["A4",.9]];
+// (?) other ringtones: simple original approximations
+const RINGTONES={
+"Nokia Tune":NOKIA_TUNE,
+"Ring ring":[["A4",.18],["A4",.18],["A4",.5],["A4",.18],["A4",.18],["A4",.9]],
+"Digital":[["C5",.12],["E5",.12],["G5",.12],["C6",.3],["G5",.12],["C6",.5]],
+"Low ring":[["A3",.3],["A3",.3],["E4",.6],["A3",.3],["E4",.6]],
+"Beep once":[["A4",.15]],
+"Jazz":[["C4",.25],["E4",.25],["G4",.25],["A4",.25],["G4",.25],["E4",.5]],
+"Warble":[["E5",.15],["G5",.15],["E5",.15],["G5",.15],["A5",.4],["G5",.15],["E5",.5]],
+};
+function volGain(){ return [0,0.05,0.09,0.14,0.2,0.28][S.settings.ringVol]||0.14; }
+function stopRing(){ if(ringTimer){clearTimeout(ringTimer);ringTimer=null;} if(ringNodes){try{ringNodes.forEach(n=>{try{n.stop()}catch(e){}})}catch(e){} ringNodes=null;} document.getElementById("phone").classList.remove("vibrate"); }
+function playSeq(seq,opts={}){
+ const ac=audio(); if(!ac)return;
+ stopRing(); ringNodes=[];
+ const gap=opts.gap??0.05, unit=opts.unit??0.42, type=opts.type||"square";
+ let t=0;
+ seq.forEach(([n,d])=>{ beep(NF(n),Math.max(40,d*unit*1000*0.92),type,opts.vol??volGain(),t); t+=d*unit+gap; });
+ return t;
+}
+function playRingtone(name,loop=true){
+ stopRing();
+ const seq=RINGTONES[name]||NOKIA_TUNE;
+ const total=playSeq(seq,{});
+ if(S.settings.vibra)document.getElementById("phone").classList.add("vibrate");
+ if(loop){ ringTimer=setTimeout(()=>{ if(S.ringing)playRingtone(name,true); },(total+0.6)*1000); }
+}
+function msgTone(){ if(S.profile==="Silent")return; beep(NF("E5"),120,"square",volGain()); setTimeout(()=>beep(NF("G5"),140,"square",volGain()),160); }
+function alarmTone(){ let i=0; const iv=setInterval(()=>{ if(!S.alarmRinging){clearInterval(iv);return;} beep(1180,140,"square",volGain()); setTimeout(()=>beep(1180,140,"square",volGain()),220); if(++i>40)clearInterval(iv); },900); }
+function startupTone(){ beep(NF("C4"),120,"triangle",0.15); setTimeout(()=>beep(NF("E4"),120,"triangle",0.15),130); setTimeout(()=>beep(NF("G4"),220,"triangle",0.15),260); }
+function shutTone(){ beep(NF("G4"),140,"triangle",0.15); setTimeout(()=>beep(NF("E4"),140,"triangle",0.15),150); setTimeout(()=>beep(NF("C4"),240,"triangle",0.15),300); }
+function warnTone(){ beep(440,120,"square",0.12); }
+/* ---------------- persistent state ---------------- */
+function loadJSON(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+function saveJSON(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+const S={
+ power:false, screen:"off", stack:[], // screen stack of {id,title,items,sel,top,data}
+ sel:0, top:0, marquee:0, lastKeyT:0, menuKeyT:0, backlightOn:false, backlightT:null, idleT:null,
+ ringing:false, ringFrom:"", callState:null, callT:0, callTimer:null,
+ dial:"", keyguard:false, menuArmedT:0, note:null, noteT:null,
+ alarmRinging:false, snoozeUntil:0, editor:null, snake:null, calc:null, sw:null, cd:null,
+ signal:4, battery:4, charging:false, noSim:false,
+ settings:Object.assign({operator:DEF_OPERATOR,clock24:true,showDate:true,pinReq:false,pin:DEF_PIN,puk:DEF_PUK,sec:DEF_SEC,
+  ringTone:"Nokia Tune",ringVol:3,callAlert:"Ringing",msgTone:true,keypadTones:true,warnTones:true,vibra:false,
+  profile:"General",prevProfile:"General",welcome:"",contrast:3,divert:false,vmbox:DEF_VMBOX,oneTouchOn:true},loadJSON("n1100_set",{})),
+ contacts:loadJSON("n1100_pb",[{name:"Mom",number:"123456"},{name:"John",number:"5551234"}]),
+ inbox:loadJSON("n1100_in",[{from:"John",text:"Hello!",time:"09:12",read:false}]),
+ outbox:loadJSON("n1100_out",[]),
+ missed:loadJSON("n1100_miss",[]),
+ received:loadJSON("n1100_recv",[]),
+ dialled:loadJSON("n1100_dial",[]),
+ reminders:loadJSON("n1100_rem",[]),
+ oneTouch:loadJSON("n1100_1t",{2:0}), // key digit -> contacts index
+ alarm:loadJSON("n1100_alm",{on:false,time:"07:00"}),
+ snakeHi:loadJSON("n1100_snake",0),
+ flash:false,
+};
+function saveAll(){ saveJSON("n1100_set",S.settings); saveJSON("n1100_pb",S.contacts); saveJSON("n1100_in",S.inbox);
+ saveJSON("n1100_out",S.outbox); saveJSON("n1100_miss",S.missed); saveJSON("n1100_recv",S.received);
+ saveJSON("n1100_dial",S.dialled); saveJSON("n1100_rem",S.reminders); saveJSON("n1100_1t",S.oneTouch);
+ saveJSON("n1100_alm",S.alarm); saveJSON("n1100_snake",S.snakeHi); }
+/* ---------------- LCD paint ---------------- */
+const cv=document.getElementById("lcd"), cx=cv.getContext("2d");
+cx.imageSmoothingEnabled=false;
+function paintLCD(){
+ const lit=S.backlightOn&&S.power;
+ const bg= !S.power? "#5a6350" : (lit? COL_BL : COL_OFF);
+ // base
+ cx.fillStyle=bg; cx.fillRect(0,0,480,325);
+ const ox=0,oy=0,sx=480/W,sy=325/H;
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++) if(fb[y*W+x]){
+   const X=Math.floor(x*sx),Y=Math.floor(y*sy);
+   // subtle shadow below (STN look)
+   cx.fillStyle= lit?"rgba(60,70,20,.35)":"rgba(40,50,30,.30)";
+   cx.fillRect(X,Y+1,sx,sy);
+   cx.fillStyle=COL_ON; cx.fillRect(X,Y,sx-0.6,sy-0.6);
+ }
+ // faint pixel grid
+ cx.fillStyle= lit?"rgba(90,110,40,.18)":"rgba(60,70,50,.22)";
+ for(let x=0;x<=W;x++)cx.fillRect(x*sx,0,1,325);
+ for(let y=0;y<=H;y++)cx.fillRect(0,y*sy,480,1);
+ document.getElementById("screenGlow").classList.toggle("lit",!!lit);
+ try{ cv.style.filter="brightness("+(0.88+(S.settings.contrast||3)*0.05)+")"; }catch(e){}
+ document.getElementById("flashCone").classList.toggle("on",S.flash);
+ document.getElementById("ledLens").classList.toggle("on",S.flash);
+}
+/* ---------------- status row / softkey / lists ---------------- */
+function nowD(){ return new Date(); }
+function fmtClock(d){ let h=d.getHours(),m=d.getMinutes(); const ap=h>=12?"p":"a";
+ if(!S.settings.clock24){ let h12=h%12; if(h12===0)h12=12; return {s:String(h12).padStart(2,"0")+":"+String(m).padStart(2,"0"),ap}; }
+ return {s:String(h).padStart(2,"0")+":"+String(m).padStart(2,"0"),ap:null}; }
+function drawStatusRow(){
+ fillRect(0,0,W,10,0);
+ // signal bars left (1-5 ascending)
+ for(let i=0;i<5;i++){ const h=2+i*1.4|0; const on=i<S.signal;
+  for(let b=0;b<3;b++)for(let r=0;r<h;r++){ if(on)px(2+i*4+b,9-r,1); } }
+ // battery right (0-4)
+ const bx=84;
+ px(bx-2,3,1);px(bx-2,6,1); // tip
+ for(let i=0;i<4;i++){ const on = S.charging ? ((Math.floor(Date.now()/400)%5)>i || i<S.battery) : (i<S.battery);
+  if(on)fillRect(bx+i*3,2,2,6,1); else { for(let e=0;e<6;e++){px(bx+i*3,2+e,1);px(bx+i*3+1,2+e,1);} fillRect(bx+i*3,3,2,4,0); } }
+ // outline
+ for(let i=0;i<12;i++){px(bx+i,1,1);px(bx+i,8,1);} for(let e=1;e<8;e++){px(bx+e*0+0,1+e,0);} // keep simple
+ // centre icons
+ let ix=30;
+ function env(){ // envelope unread
+  for(let i=0;i<8;i++){px(ix+i,3,1);px(ix+i,6,1);} px(ix,3,1);px(ix,7,0);
+  for(let e=0;e<4;e++){px(ix,e+2,1);px(ix+7,e+2,1);} px(ix+1,4,1);px(ix+2,5,1);px(ix+3,5,1);px(ix+4,5,1);px(ix+5,4,1);
+ }
+ function bell(xo,cross){ for(let i=0;i<5;i++)px(ix+xo+i,3,1); px(ix+xo+2,4,1);px(ix+xo+2,5,1);px(ix+xo+1,6,1);px(ix+xo+3,6,1); if(cross){for(let i=0;i<7;i++)px(ix+xo+i-1,2+i,1);} }
+ function lock(){ for(let i=0;i<4;i++){px(ix+i+1,4,1);px(ix+i+1,7,1);} px(ix+1,4,1);px(ix+4,4,1);px(ix+1,7,1);px(ix+4,7,1);px(ix+2,3,1);px(ix+3,3,1);px(ix+2,5,1);px(ix+3,5,1); }
+ const unread=S.inbox.some(m=>!m.read), miss=S.missed.length&&S.missed[0].new;
+ if(unread){env(); ix+=10;}
+ if(miss){ drawText(ix,1,"o"); ix+=6; }
+ if(S.alarm.on){ px(ix+2,1,1);px(ix+1,2,1);px(ix+3,2,1);px(ix+2,3,1);px(ix+2,6,1);px(ix,7,1);px(ix+4,7,1); ix+=7; }
+ if(S.keyguard){lock(); ix+=8;}
+ if(S.settings.vibra){ // vibrate icon: small phone shaking
+  px(ix,3,1);px(ix+4,3,1);px(ix,6,1);px(ix+4,6,1);px(ix+1,7,1);px(ix+3,7,1); ix+=7; }
+ if(S.profile==="Silent"){ bell(0,true); ix+=8; }
+ if(S.settings.divert){ drawText(ix,1,">"); ix+=6; }
+ fillRect(0,10,W,1,1); // divider
+}
+function drawSoftkey(label){
+ fillRect(0,54,W,11,0);
+ drawTextC(56,label||"");
+}
+function drawScrollbar(n,sel){
+ const x0=92; fillRect(x0,11,3,43,0);
+ for(let y=11;y<54;y++){px(x0+1,y,1);} // track
+ if(n<=1)return;
+ const th=Math.max(5,Math.floor(43/n));
+ const ty=11+Math.floor((43-th)*(sel/(n-1)));
+ fillRect(x0,ty,3,th,1);
+}
+function listLine(i,y,label,selected,marqueeOff){
+ const maxW=88-textW(""); // leave x92-95 free
+ if(selected){
+  const full=textW(label);
+  let lab=label, off=0;
+  if(full>86){ // marquee selected item wider than screen
+   const chars=label.split(""); let acc="",cut=0;
+   off=S.marquee;
+   // pixel scroll: draw with negative x offset
+   const totalW=full+20;
+   let dx=2- (S.marquee% (totalW));
+   drawText(dx,y,label,false);
+   fillRect(0,y,W,9,0); invertRect(0,y,90,9);
+   drawScrollbarCur(); return;
+  }
+  fillRect(0,y,90,9,1); drawText(2,y,lab,true);
+ } else drawText(2,y,label.slice(0,22));
+}
+function drawScrollbarCur(){ /* drawn by caller */ }
+// generic list draw: title row + items, pos num e.g. 3/9 at title right
+function drawList(title,items,sel,opts={}){
+ clearFB(0); drawStatusRow();
+ // title row
+ drawText(2,12,title.slice(0,12));
+ if(items.length)drawTextR(90,12,(sel+1)+"/"+items.length);
+ fillRect(0,21,W,1,1);
+ const rows=3; // lines y=23,33,43 (content y11-53, 4 lines of 10px; first is title)
+ let top=S.top;
+ if(sel<top)top=sel; if(sel>top+rows-1)top=sel-rows+1; S.top=top;
+ for(let r=0;r<rows;r++){ const idx=top+r; if(idx>=items.length)break;
+  const y=23+r*10; const it=items[idx];
+  const label=typeof it==="string"?it:it.label;
+  if(idx===sel){
+   const full=textW(label);
+   if(full>86){
+    const totalW=full+20; const dx=2-(S.marquee%totalW);
+    drawText(dx,y,label,false);
+    invertRect(0,y,90,10);
+   } else { fillRect(0,y,90,10,1); drawText(2,y+1,label,true); }
+  } else drawText(2,y+1,label.slice(0,20));
+ }
+ drawScrollbar(items.length,sel);
+ drawSoftkey(opts.soft||"Select");
+}
+/* ---------------- screen stack + navigation ---------------- */
+function cur(){ return S.stack[S.stack.length-1]||null; }
+function setScreen(id,data={}){ S.stack=[{id,...data}]; S.sel=data.sel||0; S.top=0; S.marquee=0; }
+function pushScreen(id,data={}){ S.stack.push({id,...data}); S.sel=data.sel||0; S.top=0; S.marquee=0; if(S.stack.length>12)S.stack.shift(); }
+function popScreen(){ if(S.stack.length>1){S.stack.pop(); const c=cur(); S.sel=c.sel||0; S.top=c.top||0;} else toStandby(); }
+function toStandby(){ if(!S.power)return; S.stack=[{id:"standby"}]; S.sel=0;S.top=0;S.dial="";S.editor=null;S.snake=null; }
+function pokeBacklight(){
+ S.backlightOn=true; S.lastKeyT=Date.now();
+ document.getElementById("screenGlow").classList.add("lit");
+ clearTimeout(S.backlightT);
+ const inMenu = cur()&& !["standby","off","dialler"].includes(cur().id);
+ clearTimeout(S.idleT);
+ if(S.power && cur() && cur().id!=="standby" && !["calling","incoming","connected","alarmRing","splash","poweroff"].includes(cur().id)){
+  S.idleT=setTimeout(()=>{ if(S.power)toStandby(); },MENU_IDLE_MS);
+ }
+ S.backlightT=setTimeout(()=>{ S.backlightOn=false; }, inMenu?BACKLIGHT_MENU_MS:BACKLIGHT_STANDBY_MS);
+}
+setInterval(()=>{ S.marquee+=2; },MARQUEE_MS);
+/* ---------------- note overlay ---------------- */
+function showNote(text,soft="OK",t=1800,cb=null){ S.note={text,soft,cb}; clearTimeout(S.noteT); if(t)S.noteT=setTimeout(()=>{S.note=null; if(cb)cb();},t); }
+/* ---------------- RENDER ---------------- */
+function render(){
+ clearFB(0);
+ if(!S.power){ paintLCD(); return; }
+ const c=cur(); if(!c){ toStandby(); paintLCD(); return; }
+ drawStatusRow();
+ const id=c.id;
+ if(S.note && !["incoming","calling","connected","alarmRing"].includes(id)){ drawNote(); paintLCD(); return; }
+ switch(id){
+  case "standby": drawStandby(); break;
+  case "dialler": drawDialler(); break;
+  case "menu": drawList(c.title,c.items,S.sel,{soft:"Select"}); break;
+  case "plist": drawList(c.title,c.items.map(x=>x.label??x),S.sel,{soft:c.soft||"Select"}); break;
+  case "view": drawView(c); break;
+  case "editor": drawEditor(); break;
+  case "pin": drawPin(c); break;
+  case "splash": drawSplash(); break;
+  case "poweroff": clearFB(0);drawStatusRow();drawTextC(30,"Switching off");drawSoftkey(""); break;
+  case "imei": clearFB(0);drawStatusRow();drawTextC(20,"IMEI");drawTextC(32,S.imei||DEF_IMEI);drawSoftkey("Back"); break;
+  case "version": clearFB(0);drawStatusRow();{const L=(c.text||DEF_SW).split("\n");L.forEach((l,i)=>drawTextC(16+i*9,l));}drawSoftkey("Back"); break;
+  case "calling": drawCalling(); break;
+  case "incoming": drawIncoming(); break;
+  case "connected": drawConnected(); break;
+  case "alarmRing": drawAlarmRing(); break;
+  case "profiles": drawList("Profiles",["General","Silent","Meeting","Outdoor","Pager"],S.sel,{soft:"Select"}); break;
+  case "calc": drawCalc(); break;
+  case "snake": drawSnake(); break;
+  case "stopwatch": drawStopwatch(); break;
+  case "countdown": drawCountdown(); break;
+  case "clockbig": drawClockBig(); break;
+  default: drawList(c.title||id,c.items||[],S.sel,{soft:c.soft||"Select"});
+ }
+ paintLCD();
+}
+function drawNote(){ clearFB(0); drawStatusRow(); const t=S.note.text;
+ const words=t.split(" "); let lines=[],ln="";
+ for(const w of words){ if(textW(ln+" "+w)>88){lines.push(ln);ln=w;} else ln=ln?ln+" "+w:w; }
+ lines.push(ln);
+ lines.slice(0,3).forEach((l,i)=>drawTextC(20+i*10,l));
+ drawSoftkey(S.note.soft||"OK");
+}
+function drawStandby(){
+ clearFB(0); drawStatusRow();
+ if(S.noSim){ drawTextC(20,"SIM card"); drawTextC(30,"missing"); drawSoftkey("Menu"); return; }
+ drawTextC(13,S.settings.operator||DEF_OPERATOR);
+ const ck=fmtClock(nowD());
+ const w=largeW(ck.s);
+ drawLarge(Math.floor((W-w)/2),20,ck.s);
+ if(!S.settings.clock24)drawText(Math.floor((W-w)/2)+w+1,30,ck.ap);
+ if(S.settings.showDate){ const d=nowD(); drawTextC(39,String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear()); }
+ else if(S.profile!=="General")drawTextC(39,S.profile);
+ else drawTextC(39,"");
+ if(S.settings.showDate&&S.profile!=="General")drawTextR(90,13,S.profile);
+ if(S.settings.divert)drawText(2,44,">");
+ if(S.keyguard){ drawTextC(44,"Keypad locked"); }
+ drawSoftkey("Menu");
+}
+function drawDialler(){
+ clearFB(0); drawStatusRow();
+ const d=S.dial||"";
+ if(!d){ drawTextC(30,"Enter number"); }
+ else{
+  // big digit font, scroll last chars if long
+  let shown=d.slice(-9);
+  const w=largeW(shown);
+  const x=Math.max(2,Math.floor((W-w)/2));
+  // large font only has 0-9+*#-space; map others best-effort
+  let norm=shown.replace(/[^0-9*#+ \-]/g," ");
+  drawLarge(x,18,norm);
+  drawTextC(40,d.length+" digits");
+ }
+ drawSoftkey(d?"Call":"Menu");
+}
+function drawView(c){
+ clearFB(0); drawStatusRow();
+ drawText(2,12,(c.title||"").slice(0,15));
+ fillRect(0,21,W,1,1);
+ const lines=c.lines||[];
+ const top=S.top;
+ for(let r=0;r<3;r++){ const l=lines[top+r]; if(l==null)break; drawText(2,23+r*10,String(l).slice(0,20)); }
+ if(lines.length>3)drawScrollbar(lines.length,Math.min(S.sel,lines.length-1));
+ drawSoftkey(c.soft||"Back");
+}
+function drawPin(c){
+ clearFB(0); drawStatusRow();
+ drawTextC(16,c.title||"Enter PIN");
+ let s=""; for(let i=0;i<(c.buf||"").length;i++)s+="*";
+ drawTextC(30,s||"");
+ drawTextC(42,"Attempts:"+((c.try_??0)));
+ drawSoftkey("OK");
+}
+let splashT0=0;
+function drawSplash(){
+ clearFB(0);
+ // hand-drawn NOKIA wordmark (pixel approximation) + animation: hands appear
+ const t=(Date.now()-splashT0)/2000;
+ drawTextC(20,"NOKIA");
+ // two hands reaching (very rough pixel arcs, animated)
+ const p=Math.min(1,t*1.2);
+ for(let i=0;i<Math.floor(20*p);i++){ px(30+i,34,1); px(66-i,34,1); }
+ for(let i=0;i<Math.floor(10*p);i++){ px(35+i,38,1); px(61-i,38,1); }
+ drawTextC(46,"Connecting people" .slice(0,Math.floor(17*p)));
+ drawSoftkey("");
+}
+function drawCalling(){
+ clearFB(0); drawStatusRow(); drawTextC(20,"Calling..."); drawTextC(32,S.ringFrom||S.dial); drawSoftkey("End");
+}
+function drawIncoming(){
+ clearFB(0); drawStatusRow(); drawTextC(16,"Incoming call"); drawTextC(28,S.ringFrom||"Unknown"); drawSoftkey(S.profile==="Silent"?"Silence":"Answer");
+}
+function drawConnected(){
+ clearFB(0); drawStatusRow(); drawTextC(16,S.ringFrom||S.dial); const s=S.callT;
+ drawTextC(30,String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")); drawSoftkey("End");
+}
+function drawAlarmRing(){
+ clearFB(0); drawStatusRow(); drawTextC(20,"ALARM!"); drawTextC(32,fmtClock(nowD()).s); drawSoftkey("Snooze");
+}
+/* ---------------- MENU DEFINITIONS ---------------- */
+const MAIN_MENU=["Phone book","Messages","Call register","Tones","Settings","Clock","Reminders","Games","Extras"];
+function openMenu(){ pushScreen("menu",{title:"Menu",items:MAIN_MENU}); }
+function mainSelect(i){
+ const m=MAIN_MENU[i];
+ if(m==="Phone book")pushScreen("menu",{title:"Phone book",items:["Search","Add name","1-touch dial","Erase all"]});
+ else if(m==="Messages")pushScreen("menu",{title:"Messages",items:["Write message","Inbox ("+S.inbox.length+")","Outbox ("+S.outbox.length+")","Erase all"]});
+ else if(m==="Call register")pushScreen("menu",{title:"Call register",items:["Missed calls","Received calls","Dialled numbers","Erase all","Call duration"]});
+ else if(m==="Tones")pushScreen("menu",{title:"Tones",items:["Ringing tone","Ringing volume","Incoming call alert","Message alert tone","Keypad tones","Warning tones","Vibrating alert"]});
+ else if(m==="Settings")pushScreen("menu",{title:"Settings",items:["Profiles","Phone settings","Display settings","Call settings","Security settings","Time and date","Restore factory"]});
+ else if(m==="Clock")pushScreen("menu",{title:"Clock",items:["Alarm clock","Clock settings","Show clock"]});
+ else if(m==="Reminders")pushScreen("menu",{title:"Reminders",items:["View reminders","Add reminder","Erase all"]});
+ else if(m==="Games")pushScreen("menu",{title:"Games",items:["Snake II"]});
+ else if(m==="Extras")pushScreen("menu",{title:"Extras",items:["Calculator","Countdown timer","Stopwatch","Flashlight","Software version","IMEI"]});
+}
+function fmtNumList(arr){ if(!arr.length)return ["(empty)"]; return arr.map((c,i)=>(c.name?c.name+" ":"")+ (c.number||c.from||"")); }
+// submenu handler: returns true if handled
+function submenuSelect(stackTitle,idx){
+ const t=stackTitle;
+ if(t==="Menu"){ mainSelect(idx); return true; }
+ if(t==="Phone book"){
+  if(idx===0){ const items=fmtNumList(S.contacts); S.sel=0;S.top=0; pushScreen("menu",{title:"Names",items}); }
+  else if(idx===1){ startEditor("Name:", "",(name)=>{ startEditor("Number:", "",(num)=>{ S.contacts.push({name:name||"Unnamed",number:num||""}); saveAll(); showNote("Saved","OK",1200); },"123"); }); }
+  else if(idx===2){ pushScreen("menu",{title:"1-touch dial",items:["2","3","4","5","6","7","8","9"].map(k=>k+": "+(S.oneTouch[k]!=null&&S.contacts[S.oneTouch[k]]?S.contacts[S.oneTouch[k]].name:"(empty)"))}); }
+  else if(idx===3){ S.contacts=[];S.oneTouch={};saveAll();showNote("Phone book erased","OK",1200); }
+  return true;
+ }
+ if(t==="Names"){
+  const c=S.contacts[S.top+0*0+idx -0]; // idx relative? we use S.sel global — handle via sel
+  return false; // handled specially in onNavi (needs absolute sel)
+ }
+ if(t==="1-touch dial"){
+  const key=String(idx+2);
+  const items=S.contacts.map((c,i)=>c.name+" "+c.number);
+  pushScreen("menu",{title:"Key "+key,items:["(empty)",...items]}); cur().assignKey=key; return true;
+ }
+ if(t.startsWith("Key ")){ const key=t.split(" ")[1]; if(idx===0)delete S.oneTouch[key]; else S.oneTouch[key]=idx-1; saveAll(); showNote("Saved","OK",1000,()=>{popScreen();popScreen();}); return true; }
+ if(t==="Messages"){
+  if(idx===0){ startEditor("Message:", "",(txt)=>{ // choose recipient
+    const items=S.contacts.map(c=>c.name); pushScreen("menu",{title:"Send to",items:[...items,"Enter number"]}); cur().msgText=txt; }); }
+  else if(idx===1){ pushScreen("menu",{title:"Inbox",items:S.inbox.length?S.inbox.map(m=>(m.read?"":"* ")+m.from):["(empty)"]}); }
+  else if(idx===2){ pushScreen("menu",{title:"Outbox",items:S.outbox.length?S.outbox.map(m=>m.to):["(empty)"]}); }
+  else if(idx===3){ S.inbox=[];S.outbox=[];saveAll();showNote("Messages erased","OK",1200); }
+  return true;
+ }
+ if(t==="Send to"){
+  const txt=cur().msgText||S.tmpMsg||"";
+  let to="";
+  const names=S.contacts.map(c=>c.name);
+  if(idx<names.length)to=S.contacts[idx].number;
+  else { startEditor("Number:","",(n)=>{ sendSMS(n,txt); toStandby(); },"123"); return true; }
+  sendSMS(to,txt); popScreen(); popScreen(); return true;
+ }
+ if(t==="Inbox"){
+  if(!S.inbox.length){showNote("(empty)","Back",1000);return true;}
+  const m=S.inbox[S.sel]; m.read=true; saveAll();
+  pushScreen("view",{title:"From "+m.from,lines:wrapText(m.from+": "+m.text),soft:"Options"}); cur().msgIdx=S.sel; cur().box="inbox"; return true;
+ }
+ if(t==="Outbox"){
+  if(!S.outbox.length){showNote("(empty)","Back",1000);return true;}
+  const m=S.outbox[S.sel];
+  pushScreen("view",{title:"To "+m.to,lines:wrapText("To "+m.to+": "+m.text),soft:"Back"}); return true;
+ }
+ if(t==="Call register"){
+  if(idx===0)pushScreen("menu",{title:"Missed",items:S.missed.length?S.missed.map(c=>c.from+" "+c.time):["(empty)"]});
+  if(idx===1)pushScreen("menu",{title:"Received",items:S.received.length?S.received.map(c=>c.from+" "+c.time):["(empty)"]});
+  if(idx===2)pushScreen("menu",{title:"Dialled",items:S.dialled.length?S.dialled.map(c=>c.number):["(empty)"]});
+  if(idx===3){S.missed=[];S.received=[];S.dialled=[];saveAll();showNote("Registers erased","OK",1200);}
+  if(idx===4)pushScreen("view",{title:"Duration",lines:["Last: "+fmtDur(S.lastDur||0),"Total: "+fmtDur(S.totalDur||0),"Clear? press Navi"],soft:"Back"});
+  return true;
+ }
+ if(["Missed","Received","Dialled"].includes(t)){
+  const arr=t==="Missed"?S.missed:t==="Received"?S.received:S.dialled;
+  if(!arr.length)return true;
+  const e=arr[S.sel];
+  S.dial=e.number||e.from||""; pushScreen("dialler",{}); // quick dial view, Navi calls
+  return true;
+ }
+ if(t==="Tones"){
+  if(idx===0)pushScreen("menu",{title:"Ringing tone",items:Object.keys(RINGTONES)});
+  if(idx===1)pushScreen("menu",{title:"Ring volume",items:["1","2","3","4","5"]});
+  if(idx===2)pushScreen("menu",{title:"Call alert",items:["Ringing","Ascending","Ring once","Beep once","Off"]});
+  if(idx===3)pushScreen("menu",{title:"Msg. alert",items:["On","Off"]});
+  if(idx===4)pushScreen("menu",{title:"Keypad tones",items:["On","Off"]});
+  if(idx===5)pushScreen("menu",{title:"Warning tones",items:["On","Off"]});
+  if(idx===6)pushScreen("menu",{title:"Vibrating",items:["On","Off"]});
+  return true;
+ }
+ if(t==="Ringing tone"){ S.settings.ringTone=Object.keys(RINGTONES)[S.sel]; saveAll(); playSeq(RINGTONES[S.settings.ringTone],{}); showNote("Tone set","OK",1000); return true; }
+ if(t==="Ring volume"){ S.settings.ringVol=S.sel+1; saveAll(); beep(880,80,"square",volGain()); showNote("Volume "+(S.sel+1),"OK",900); return true; }
+ if(t==="Call alert"){ S.settings.callAlert=["Ringing","Ascending","Ring once","Beep once","Off"][S.sel]; saveAll(); showNote("Saved","OK",900); return true; }
+ if(t==="Msg. alert"){ S.settings.msgTone=(S.sel===0); saveAll(); if(S.settings.msgTone)msgTone(); showNote("Saved","OK",900); return true; }
+ if(t==="Keypad tones"){ S.settings.keypadTones=(S.sel===0); saveAll(); showNote("Saved","OK",900); return true; }
+ if(t==="Warning tones"){ S.settings.warnTones=(S.sel===0); saveAll(); showNote("Saved","OK",900); return true; }
+ if(t==="Vibrating"){ S.settings.vibra=(S.sel===0); saveAll(); showNote("Saved","OK",900); return true; }
+ if(t==="Settings"){
+  if(idx===0)pushScreen("profiles",{});
+  if(idx===1)pushScreen("menu",{title:"Phone settings",items:["Welcome note","Language","Operator name"]});
+  if(idx===2)pushScreen("menu",{title:"Display",items:["Contrast 1-5","Backlight info"]});
+  if(idx===3)pushScreen("menu",{title:"Call settings",items:["Call divert","Voice mailbox","1-touch dial"]});
+  if(idx===4)pushScreen("menu",{title:"Security",items:["PIN request","Change PIN","Change sec. code"]});
+  if(idx===5)pushScreen("menu",{title:"Time and date",items:["12/24 hour","Show date","Set time","Set date"]});
+  if(idx===6){ startEditor("Sec. code:", "",(code)=>{ if(code===S.settings.sec){ doFactory(); } else showNote("Wrong code","Back",1200); },"123"); }
+  return true;
+ }
+ if(t==="Phone settings"){
+  if(idx===0)startEditor("Welcome:",S.settings.welcome,(v)=>{S.settings.welcome=v;saveAll();showNote("Saved","OK",900);});
+  if(idx===1)showNote("English","OK",1000);
+  if(idx===2)startEditor("Operator:",S.settings.operator,(v)=>{S.settings.operator=v||DEF_OPERATOR;saveAll();document.getElementById("dbgOper").value=S.settings.operator;showNote("Saved","OK",900);});
+  return true;
+ }
+ if(t==="Display"){
+  if(idx===0)pushScreen("menu",{title:"Contrast",items:["1","2","3","4","5"]});
+  else showNote("Light: auto","OK",1100);
+  return true;
+ }
+ if(t==="Contrast"){ S.settings.contrast=S.sel+1; saveAll(); showNote("Contrast "+(S.sel+1),"OK",900); return true; }
+ if(t==="Call settings"){
+  if(idx===0)pushScreen("menu",{title:"Divert",items:["Off","On"]});
+  if(idx===1)startEditor("Mailbox:",S.settings.vmbox,(v)=>{S.settings.vmbox=v;saveAll();showNote("Saved","OK",900);},"123");
+  if(idx===2)pushScreen("menu",{title:"1-touch",items:["On","Off"]});
+  return true;
+ }
+ if(t==="Divert"){ S.settings.divert=(S.sel===1); saveAll(); showNote(S.settings.divert?"Divert on":"Divert off","OK",1000); return true; }
+ if(t==="1-touch"){ S.settings.oneTouchOn=(S.sel===0); saveAll(); showNote("Saved","OK",900); return true; }
+ if(t==="Security"){
+  if(idx===0)pushScreen("menu",{title:"PIN request",items:["Off","On"]});
+  if(idx===1)startEditor("Old PIN:","",(o)=>{ if(o!==S.settings.pin){showNote("Wrong PIN","Back",1200);return;} startEditor("New PIN:","",(n)=>{S.settings.pin=n.slice(0,8)||S.settings.pin;saveAll();showNote("PIN changed","OK",1100);},"123"); },"123");
+  if(idx===2)startEditor("Old code:","",(o)=>{ if(o!==S.settings.sec){showNote("Wrong code","Back",1200);return;} startEditor("New code:","",(n)=>{S.settings.sec=n.slice(0,8)||S.settings.sec;saveAll();showNote("Code changed","OK",1100);},"123"); },"123");
+  return true;
+ }
+ if(t==="PIN request"){ S.settings.pinReq=(S.sel===1); saveAll(); showNote(S.settings.pinReq?"PIN on":"PIN off","OK",1000); return true; }
+ if(t==="Time and date"){
+  if(idx===0)pushScreen("menu",{title:"Hour format",items:["24h","12h"]});
+  if(idx===1)pushScreen("menu",{title:"Show date",items:["On","Off"]});
+  if(idx===2)startEditor("Time HHMM:","",(v)=>{ showNote("Set "+v,"OK",1000); },"123");
+  if(idx===3)startEditor("Date:","",(v)=>{ showNote("Set "+v,"OK",1000); });
+  return true;
+ }
+ if(t==="Hour format"){ S.settings.clock24=(S.sel===0); saveAll(); showNote("Saved","OK",900); return true; }
+ if(t==="Show date"){ S.settings.showDate=(S.sel===0); saveAll(); showNote("Saved","OK",900); return true; }
+ if(t==="Clock"){
+  if(idx===0)pushScreen("menu",{title:"Alarm clock",items:["Alarm: "+(S.alarm.on?"On":"Off"),"Alarm time "+S.alarm.time]});
+  if(idx===1)pushScreen("menu",{title:"Clock settings",items:["12/24 hour","Show date"]});
+  if(idx===2)pushScreen("clockbig",{});
+  return true;
+ }
+ if(t==="Alarm clock"){
+  if(idx===0)pushScreen("menu",{title:"Alarm",items:["Off","On"]});
+  else startEditor("HH:MM",S.alarm.time,(v)=>{ if(/^\d{1,2}:?\d{2}$/.test(v)){ let t=v.includes(":")?v:v.slice(0,-2)+":"+v.slice(-2); S.alarm.time=t;S.alarm.on=true;saveAll();showNote("Alarm "+t,"OK",1200);} },"123");
+  return true;
+ }
+ if(t==="Alarm"){ S.alarm.on=(S.sel===1); saveAll(); showNote(S.alarm.on?"Alarm on":"Alarm off","OK",1000); return true; }
+ if(t==="Clock settings"){
+  if(idx===0)pushScreen("menu",{title:"Hour format",items:["24h","12h"]});
+  else pushScreen("menu",{title:"Show date",items:["On","Off"]});
+  return true;
+ }
+ if(t==="Reminders"){
+  if(idx===0)pushScreen("menu",{title:"My reminders",items:S.reminders.length?S.reminders.map(r=>r.text):["(empty)"]});
+  if(idx===1)startEditor("Reminder:", "",(txt)=>{ S.reminders.push({text:txt,time:""}); saveAll(); showNote("Saved","OK",1000); });
+  if(idx===2){S.reminders=[];saveAll();showNote("Erased","OK",1000);}
+  return true;
+ }
+ if(t==="Reminders"&&false){}
+ if(t==="My reminders"){ if(S.reminders.length&&S.reminders[S.sel])pushScreen("view",{title:"Reminder",lines:wrapText(S.reminders[S.sel].text),soft:"Back"}); return true; }
+ if(t==="Games"){ startSnake(); return true; }
+ if(t==="Extras"){
+  if(idx===0)startCalc();
+  if(idx===1)startCountdown();
+  if(idx===2)startStopwatch();
+  if(idx===3)pushScreen("menu",{title:"Flashlight",items:["Off","On"]});
+  if(idx===4)pushScreen("version",{});
+  if(idx===5)pushScreen("imei",{});
+  return true;
+ }
+ if(t==="Flashlight"){ S.flash=(S.sel===1); showNote(S.flash?"Torch on":"Torch off","OK",1000); return true; }
+ if(t==="Profiles"){ /* handled via profiles screen */ }
+ if(t==="Profiles "){}
+ return false;
+}
+function wrapText(s){ const words=s.split(" "); let lines=[],ln=""; for(const w of words){ if(textW(ln+" "+w)>86){lines.push(ln);ln=w;} else ln=ln?ln+" "+w:w; } lines.push(ln); return lines; }
+function fmtDur(s){ s=s||0; return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+function doFactory(){ const op=S.settings.operator; S.settings=Object.assign({operator:op}, {clock24:true,showDate:true,pinReq:false,pin:DEF_PIN,puk:DEF_PUK,sec:DEF_SEC,ringTone:"Nokia Tune",ringVol:3,callAlert:"Ringing",msgTone:true,keypadTones:true,warnTones:true,vibra:false,profile:"General",prevProfile:"General",welcome:"",contrast:3,divert:false,vmbox:"",oneTouchOn:true});
+ S.contacts=[];S.inbox=[];S.outbox=[];S.missed=[];S.received=[];S.dialled=[];S.reminders=[];S.oneTouch={};S.alarm={on:false,time:"07:00"}; saveAll(); showNote("Factory reset","OK",1400); }
+function sendSMS(to,text){
+ S.outbox.push({to,text,time:fmtClock(nowD()).s}); saveAll(); showNote("Sent","OK",1200);
+ // loopback echo for demo if sending to self contact? no auto-reply
+}
+/* ---------------- multi-tap editor ---------------- */
+const MTAP={"1":"1.,?!'1","2":"2ABCabc","3":"3DEFdef","4":"4GHIghi","5":"5JKLjkl","6":"6MNOmno","7":"7PQRSpqrs","8":"8TUVtuv","9":"9WXYZwxyz","0":"0 +","*":"*#@_","#":"#"};
+function startEditor(title,init,done,mode){
+ S.editor={title,buf:init||"",done,mode:mode||"Abc",lastKey:null,lastT:0,pos:(init||"").length};
+ pushScreen("editor",{title});
+}
+function drawEditor(){
+ const e=S.editor; if(!e){drawSoftkey("Back");return;}
+ clearFB(0); drawStatusRow();
+ drawText(2,12,e.title.slice(0,14));
+ drawTextR(90,12,e.mode);
+ fillRect(0,21,W,1,1);
+ const vis=e.buf.slice(-60);
+ const words=vis.split(" "); let lines=[],ln="";
+ for(const w of words){ if(textW(ln+" "+w)>90){lines.push(ln);ln=w;} else ln=ln?ln+" "+w:w; } lines.push(ln);
+ lines.slice(-3).forEach((l,i)=>drawText(2,23+i*10,l.slice(0,22)));
+ // cursor blink
+ if(Math.floor(Date.now()/500)%2===0){ const last=lines[lines.length-1]||""; const cxp=2+textW(last); px(cxp,23+(lines.length-1)*10,1);px(cxp,24+(lines.length-1)*10,1);px(cxp,25+(lines.length-1)*10,1);px(cxp,26+(lines.length-1)*10,1);px(cxp,27+(lines.length-1)*10,1);px(cxp,28+(lines.length-1)*10,1);px(cxp,29+(lines.length-1)*10,1); }
+ drawSoftkey("Save");
+}
+function editorKey(k,long){
+ const e=S.editor; if(!e)return;
+ if(k==="#"){ // cycle Abc/abc/ABC/123
+  e.mode=e.mode==="Abc"?"abc":e.mode==="abc"?"ABC":e.mode==="ABC"?"123":"Abc"; return;
+ }
+ if(k==="C"){ if(long){ if(e.buf){e.buf="";} else {S.editor=null;popScreen();return;} } else { if(e.buf)e.buf=e.buf.slice(0,-1); else {S.editor=null;popScreen();return;} } e.lastKey=null; return; }
+ if(k==="NAVI"){ const cb=e.done; S.editor=null; popScreen(); if(cb)cb(e.buf); return; }
+ if(/^[0-9*]$/.test(k)){
+  if(e.mode==="123"){ e.buf+=k; e.lastKey=null; return; }
+  const chars=MTAP[k]||k;
+  const now=Date.now();
+  if(e.lastKey===k && now-e.lastT<1000){
+   // replace last char with next in cycle
+   const seq=chars; const last=e.buf.slice(-1);
+   const i=seq.indexOf(last);
+   const ni=(i+1)%seq.length;
+   let ch=seq[ni];
+   if(e.mode==="abc")ch=ch.toLowerCase(); else if(e.mode==="ABC")ch=ch.toUpperCase();
+   else if(e.mode==="Abc"){ ch = e.buf.length<=1? ch.toUpperCase():ch.toLowerCase(); if(e.buf.length<=1)ch=ch.toUpperCase(); }
+   e.buf=e.buf.slice(0,-1)+ch;
+  } else {
+   let ch=chars[chars.length>1?1:0]||k;
+   if(e.mode==="abc")ch=ch.toLowerCase(); else if(e.mode==="ABC")ch=ch.toUpperCase();
+   else if(e.mode==="Abc"){ ch = e.buf.length===0?ch.toUpperCase():ch.toLowerCase(); }
+   // digit keys in Abc: first press gives letter; keep simple
+   if(ch==="2"||ch==="3"||ch==="4"||ch==="5"||ch==="6"||ch==="7"||ch==="8"||ch==="9"||ch==="0"){ /* keep */ }
+   e.buf+=ch;
+  }
+  e.lastKey=k; e.lastT=now; return;
+ }
+}
+/* ---------------- Extras: calculator ---------------- */
+function startCalc(){ S.calc={expr:"",res:""}; pushScreen("calc",{}); }
+function drawCalc(){
+ clearFB(0); drawStatusRow(); drawText(2,12,"Calculator");
+ fillRect(0,21,W,1,1);
+ const ex=S.calc.expr||"0";
+ // big-ish display: use large font for trailing digits
+ const tail=ex.slice(-9).replace(/[^0-9*#+ \-]/g," ");
+ if(tail.trim())drawLarge(2,23,tail); else drawText(2,25,ex.slice(-15)||"0");
+ drawText(2,43,("="+S.calc.res).slice(-20));
+ drawSoftkey("Use");
+}
+function calcKey(k,long){
+ const c=S.calc; if(!c)return;
+ if(long&&k==="*"){ c.expr+="/"; return; }
+ if(long&&k==="#"){ c.expr+="-"; return; }
+ if(k==="C"){ c.expr=c.expr.slice(0,-1); c.res=""; return; }
+ if(k==="NAVI"){ try{ const v=Function('"use strict";return ('+c.expr.replace(/[^0-9+\-*/.() ]/g,"")+')')(); c.res=String(Math.round(v*1e8)/1e8).slice(0,15); }catch(e){ c.res="Error"; } return; }
+ const map={"*":"*","#":"#"};
+ if(/^[0-9*#+]$/.test(k)){ let ch=k; if(k==="#")ch="+"; c.expr+=(ch==="+"?"+":ch); }
+ if(k==="UP")c.expr+="+"; if(k==="DOWN")c.expr+="-";
+}
+/* ---------------- Extras: snake II ---------------- */
+function startSnake(){
+ S.snake={x:[10,9,8],y:[5,5,5],dx:1,dy:0,fx:20,fy:8,score:0,alive:true,t:0,hi:S.snakeHi};
+ pushScreen("snake",{});
+}
+function snakeStep(){
+ const s=S.snake; if(!s||!s.alive)return;
+ s.t++;
+ const nx=s.x[0]+s.dx, ny=s.y[0]+s.dy;
+ // playfield x0-95 y11-53 mapped to cells 24x10 (4px cells)
+ if(nx<0||ny<0||nx>=24||ny>=10||s.x.some((v,i)=>v===nx&&s.y[i]===ny)){ s.alive=false; if(s.score>S.snakeHi){S.snakeHi=s.score;saveAll();} return; }
+ s.x.unshift(nx); s.y.unshift(ny);
+ if(nx===s.fx&&ny===s.fy){ s.score++; s.fx=Math.floor(Math.random()*24); s.fy=Math.floor(Math.random()*10); }
+ else { s.x.pop(); s.y.pop(); }
+}
+setInterval(()=>{ if(cur()&&cur().id==="snake")snakeStep(); },180);
+function drawSnake(){
+ const s=S.snake; clearFB(0); drawStatusRow();
+ if(!s){drawSoftkey("Back");return;}
+ if(!s.alive){ drawTextC(22,"Game over"); drawTextC(32,"Score "+s.score+" Hi "+Math.max(S.snakeHi,s.score)); drawSoftkey("Back"); return; }
+ // field
+ for(let i=0;i<s.x.length;i++)fillRect(s.x[i]*4,s.y[i]*4+11,3,3,1);
+ fillRect(s.fx*4+1,s.fy*4+12,2,2,1);
+ drawTextR(90,1,""+s.score);
+ drawSoftkey("Stop");
+}
+/* ---------------- Stopwatch / countdown / big clock ---------------- */
+function startStopwatch(){ S.sw={run:false,t:0,last:0}; pushScreen("stopwatch",{}); }
+setInterval(()=>{ if(S.sw&&S.sw.run&&cur()&&cur().id==="stopwatch")S.sw.t+=100; },100);
+function drawStopwatch(){
+ clearFB(0); drawStatusRow(); drawText(2,12,"Stopwatch");
+ fillRect(0,21,W,1,1);
+ const t=(S.sw?S.sw.t:0)/1000;
+ const mm=String(Math.floor(t/60)).padStart(2,"0"),ss=String(Math.floor(t%60)).padStart(2,"0"),ds=Math.floor((t%1)*10);
+ drawLarge(8,24,mm+" "+ss);
+ drawText(70,32,"."+ds);
+ drawSoftkey(S.sw&&S.sw.run?"Stop":"Start");
+}
+function startCountdown(){ S.cd={set:"0100",run:false,left:60,last:0}; pushScreen("countdown",{}); }
+setInterval(()=>{ if(S.cd&&S.cd.run){ S.cd.left-=1; if(S.cd.left<=0){S.cd.run=false;S.cd.left=0;alarmToneOnce();showNote("Time up","Stop",3000);} } },1000);
+function alarmToneOnce(){ beep(1180,200,"square",0.2); setTimeout(()=>beep(1180,200,"square",0.2),300); }
+function drawCountdown(){
+ clearFB(0); drawStatusRow(); drawText(2,12,"Countdown");
+ fillRect(0,21,W,1,1);
+ const l=S.cd?S.cd.left:0;
+ drawTextC(26,String(Math.floor(l/60)).padStart(2,"0")+":"+String(l%60).padStart(2,"0"));
+ drawTextC(40,S.cd&&S.cd.run?"Running":"Stopped");
+ drawSoftkey(S.cd&&S.cd.run?"Stop":"Start");
+}
+function drawClockBig(){
+ clearFB(0); drawStatusRow(); const ck=fmtClock(nowD());
+ const w=largeW(ck.s); drawLarge(Math.floor((W-w)/2),22,ck.s);
+ if(S.settings.showDate){const d=nowD();drawTextC(42,String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0"));}
+ drawSoftkey("Back");
+}
+/* ---------------- CALL FLOWS ---------------- */
+function startCall(num){
+ if(!num){showNote("Enter number","OK",1100);return;}
+ S.dialled.unshift({number:num,time:fmtClock(nowD()).s}); S.dialled=S.dialled.slice(0,20); saveAll();
+ S.ringFrom=num; S.callState="calling"; S.ringing=true;
+ pushScreen("calling",{});
+ playRingtone(S.settings.ringTone==="Beep once"?"Beep once":S.settings.ringTone,false);
+ if(S.settings.callAlert==="Off")stopRing();
+ S.callTimer=setTimeout(()=>{ if(cur()&&cur().id==="calling"){ setScreen("connected",{}); S.callState="connected"; S.callT=0; stopRing();
+  S.callTimer=setInterval(()=>{S.callT++; S.totalDur=(S.totalDur||0)+1; S.lastDur=S.callT;},1000); } },3000);
+}
+function endCall(){
+ clearTimeout(S.callTimer); clearInterval(S.callTimer); stopRing(); S.ringing=false; S.callState=null;
+ toStandby();
+}
+function incomingCall(from){
+ if(!S.power)return;
+ S.ringFrom=from||"054 123456"; S.ringing=true; S.callState="incoming";
+ if(S.keyguard){ /* calls can still be answered while locked */ }
+ pushScreen("incoming",{});
+ if(S.profile!=="Silent"&&S.settings.callAlert!=="Off"){
+  if(S.settings.callAlert==="Ring once")playRingtone(S.settings.ringTone,false);
+  else if(S.settings.callAlert==="Beep once")playRingtone("Beep once",false);
+  else playRingtone(S.settings.ringTone,true);
+ }
+ if(S.settings.vibra)document.getElementById("phone").classList.add("vibrate");
+}
+function answerCall(){
+ stopRing(); S.ringing=false; S.callState="connected"; S.callT=0;
+ S.received.unshift({from:S.ringFrom,time:fmtClock(nowD()).s,new:false}); S.received=S.received.slice(0,20); saveAll();
+ setScreen("connected",{});
+ S.callTimer=setInterval(()=>{S.callT++; S.totalDur=(S.totalDur||0)+1; S.lastDur=S.callT;},1000);
+}
+function rejectCall(){
+ stopRing(); clearTimeout(S.callTimer);
+ S.missed.unshift({from:S.ringFrom,time:fmtClock(nowD()).s,new:true}); S.missed=S.missed.slice(0,20); saveAll();
+ S.ringing=false; S.callState=null; toStandby();
+ if(S.settings.warnTones)warnTone();
+}
+/* ---------------- POWER ---------------- */
+function powerOn(){
+ if(S.power)return;
+ audio(); S.power=true; S.backlightOn=true; pokeBacklight();
+ startupTone(); splashT0=Date.now(); setScreen("splash",{});
+ setTimeout(()=>{
+  if(S.settings.pinReq){ setScreen("pin",{title:"Enter PIN",buf:"",try_:0,stage:"pin"}); }
+  else afterPin();
+ },2100);
+}
+function afterPin(){
+ if(S.settings.welcome){ S.note={text:S.settings.welcome,soft:"OK"}; clearTimeout(S.noteT); S.noteT=setTimeout(()=>{S.note=null;toStandby();},1800); setScreen("standby",{}); }
+ else toStandby();
+}
+function powerOff(){
+ shutTone(); setScreen("poweroff",{});
+ setTimeout(()=>{ S.power=false; S.stack=[{id:"off"}]; S.backlightOn=false; S.flash=false; stopRing(); clearInterval(S.callTimer); },1200);
+}
+function pinKey(k){
+ const c=cur(); if(!c||c.id!=="pin")return;
+ if(k==="C"){ c.buf=c.buf.slice(0,-1); return; }
+ if(/^[0-9]$/.test(k)){ c.buf+=k; if(c.buf.length>=8)c.buf=c.buf.slice(0,8); return; }
+ if(k==="NAVI"){
+  if(c.stage==="pin"){
+   if(c.buf===S.settings.pin){ afterPin(); }
+   else { c.try_=(c.try_||0)+1; c.buf="";
+    if(c.try_>=3){ setScreen("pin",{title:"PIN blocked, PUK:",buf:"",try_:0,stage:"puk"}); showNote("PIN blocked","OK",1500); }
+    else showNote("Wrong PIN","OK",1200);
+   }
+  } else if(c.stage==="puk"){
+   if(c.buf===S.settings.puk){ S.settings.pin=DEF_PIN; saveAll(); showNote("PIN reset","OK",1400,()=>afterPin()); }
+   else showNote("Wrong PUK","OK",1200);
+   c.buf="";
+  }
+ }
+}
+/* ---------------- NAVI / C / SCROLL dispatch ---------------- */
+function onNavi(){
+ pokeBacklight(); if(!S.power)return;
+ if(S.note){ const cb=S.note.cb; S.note=null; clearTimeout(S.noteT); if(cb)cb(); return; }
+ const c=cur(); if(!c)return;
+ const id=c.id;
+ if(id==="off")return;
+ if(id==="pin"){ pinKey("NAVI"); return; }
+ if(id==="standby"){ openMenu(); return; }
+ if(id==="dialler"){
+  if(!S.dial){ openMenu(); return; }
+  if(S.dial==="*#06#"){ pushScreen("imei",{}); S.dial=""; return; }
+  if(S.dial==="*#0000#"){ pushScreen("version",{}); S.dial=""; return; }
+  startCall(S.dial); return;
+ }
+ if(id==="menu"){
+  if(c.contactIdx!=null){
+   const ci=c.contactIdx, contact=S.contacts[ci];
+   if(!contact){popScreen();return;}
+   if(S.sel===0){ startCall(contact.number); }
+   else if(S.sel===1){ pushScreen("view",{title:contact.name,lines:[contact.name,contact.number],soft:"Back"}); }
+   else if(S.sel===2){ S.contacts.splice(ci,1); saveAll(); showNote("Erased","OK",1000,()=>{popScreen();popScreen();}); }
+   return;
+  }
+  if(c.title==="Options"&&c.msgIdx!=null){
+   const m=S.inbox[c.msgIdx];
+   if(!m){popScreen();return;}
+   if(S.sel===0){ startEditor("Message:","",(txt)=>{ sendSMS(m.from,txt); toStandby(); }); }
+   else if(S.sel===1){ S.inbox.splice(c.msgIdx,1); saveAll(); showNote("Erased","OK",900,()=>{toStandby();}); }
+   else if(S.sel===2){ S.dial=m.from; setScreen("dialler",{}); }
+   return;
+  }
+  const t=c.title;
+  if(t==="Names"){ // absolute selection
+   const contact=S.contacts[S.sel];
+   if(!contact){return;}
+   pushScreen("menu",{title:contact.name,items:["Call","Details","Erase"]}); cur().contactIdx=S.sel; return;
+  }
+  if(c.assignKey){ submenuSelect(t,S.sel); return; }
+  if(c.msgText!=null&&t==="Send to"){ submenuSelect(t,S.sel); return; }
+  // Profiles list inside Settings? handled below
+  if(!submenuSelect(t,S.sel)){
+   // generic: if item leads nowhere, note
+   showNote("Saved","OK",900);
+  }
+  // special: contact action menu (handled at top)
+  return;
+ }
+ if(id==="plist"){ if(c.onPick)c.onPick(S.sel); return; }
+ if(id==="profiles"){ activateProfile(["General","Silent","Meeting","Outdoor","Pager"][S.sel]); popScreen(); return; }
+ if(id==="view"){
+  if(c.box==="inbox"&&c.soft==="Options"){ // message options
+   pushScreen("menu",{title:"Options",items:["Reply","Erase","Call sender"]}); cur().msgIdx=c.msgIdx; return;
+  }
+  if(c.title==="Duration"){ S.lastDur=0;S.totalDur=0;showNote("Cleared","OK",900);return; }
+  popScreen(); return;
+ }
+ if(id==="editor"){ editorKey("NAVI"); return; }
+ if(id==="calling"||id==="connected"){ endCall(); return; }
+ if(id==="incoming"){ if(S.keyguard){answerCall();S.keyguard=false;} else answerCall(); return; }
+ if(id==="alarmRing"){ snoozeAlarm(); return; }
+ if(id==="calc"){ calcKey("NAVI"); return; }
+ if(id==="snake"){ if(!S.snake.alive){toStandby();} return; }
+ if(id==="stopwatch"){ S.sw.run=!S.sw.run; if(S.sw.run)S.sw.last=Date.now(); return; }
+ if(id==="countdown"){
+  if(S.cd.run)S.cd.run=false;
+  else { // prompt minutes via editor first time
+   if(S.cd.left<=0||S.cd.left===60){ startEditor("MM:SS", "",(v)=>{ const m=v.match(/(\d+)\D*(\d*)/); let s=60; if(m){ s=(parseInt(m[1])||0)*60+(parseInt(m[2])||0); if(s<=0)s=60; } S.cd.left=Math.min(s,5999); S.cd.run=true; },"123"); }
+   else S.cd.run=true;
+  }
+  return;
+ }
+ if(id==="imei"||id==="version"||id==="clockbig"){ popScreen(); return; }
+ // Options submenu for message
+ if(id==="menu"&&c.title==="Options"){ return; }
+}
+function onBack(long){
+ pokeBacklight(); if(!S.power)return;
+ if(S.note){S.note=null;clearTimeout(S.noteT);return;}
+ const c=cur(); if(!c)return;
+ if(c.id==="pin")return; // must enter PIN/PUK
+ if(c.id==="editor"){ if(long){S.editor=null;toStandby();} else {S.editor=null;popScreen();} return; }
+ if(c.id==="standby"){ return; } // C does nothing in standby
+ if(c.id==="calling"||c.id==="connected"){ endCall(); return; }
+ if(c.id==="incoming"){ rejectCall(); return; }
+ if(c.id==="alarmRing"){ stopAlarm(); return; }
+ if(long){ toStandby(); return; }
+ popScreen();
+}
+function onScroll(dir){ // dir +1 down, -1 up
+ pokeBacklight(); if(!S.power)return;
+ const c=cur(); if(!c)return;
+ if(c.id==="standby"){
+  // Up or Down = Names quick access
+  const items=fmtNumList(S.contacts); pushScreen("menu",{title:"Names",items}); return;
+ }
+ if(c.id==="snake"&&S.snake&&S.snake.alive){
+  const s=S.snake;
+  if(dir===-1){ if(s.dy!==1){s.dx=0;s.dy=-1;} } else { if(s.dy!==-1){s.dx=0;s.dy=1;} }
+  return;
+ }
+ if(c.id==="view"){ S.top=Math.max(0,S.top+dir); S.sel=Math.max(0,S.sel+dir); return; }
+ if(c.id==="calc"){ calcKey(dir===1?"DOWN":"UP"); return; }
+ if(["menu","profiles","plist"].includes(c.id)){
+  let n=c.items?c.items.length:(c.id==="profiles"?5:0);
+  if(c.id==="profiles")n=5;
+  if(!n)return;
+  S.sel=(S.sel+dir+n)%n; // wrap-around
+  c.sel=S.sel; S.marquee=0;
+  if(S.settings.warnTones&&n>1)beep(dir>0?660:760,20,"square",0.05);
+  return;
+ }
+ if(c.id==="pin"){ return; }
+}
+/* ---------------- profiles ---------------- */
+function activateProfile(p){
+ S.settings.prevProfile=S.settings.profile==="Silent"?S.settings.prevProfile:S.settings.profile;
+ S.settings.profile=p; S.profile=p; saveAll();
+ stopRing();
+ showNote(p==="General"?"Profile activated":p+" activated","OK",1500);
+}
+function powerShortMenu(){
+ pushScreen("menu",{title:"Profiles",items:["General","Silent","Meeting","Outdoor","Pager","Flashlight "+(S.flash?"Off":"On")]});
+ const base=cur();
+ // override select for this menu: monkey-patch via custom handler flag
+ base.powerProfiles=true;
+}
+/* ---------------- alarm / snooze ---------------- */
+function stopAlarm(){ S.alarmRinging=false; S.snoozeUntil=0; stopRing(); toStandby(); }
+function snoozeAlarm(){ S.alarmRinging=false; stopRing(); S.snoozeUntil=Date.now()+5*60*1000; showNote("Snooze on","OK",1200,()=>toStandby()); }
+setInterval(()=>{
+ if(!S.power||S.alarmRinging)return;
+ if(S.alarm.on&&!S.snoozeUntil){
+  const d=nowD(), hm=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  if(hm===S.alarm.time&&d.getSeconds()<2){ S.alarmRinging=true; setScreen("alarmRing",{}); alarmTone(); pokeBacklight(); }
+ }
+ if(S.snoozeUntil&&Date.now()>S.snoozeUntil){ S.snoozeUntil=0; S.alarmRinging=true; setScreen("alarmRing",{}); alarmTone(); }
+},1000);
+/* ---------------- key dispatcher ---------------- */
+function showLocked(){ showNote("Keypad locked","Unlock",900); }
+function handleDigit(k,long){
+ // editor / pin / calc first
+ const c=cur();
+ if(c&&c.id==="editor"){ editorKey(k,long); return; }
+ if(c&&c.id==="pin"){ pinKey(k); return; }
+ if(c&&c.id==="calc"){ calcKey(k,long); return; }
+ if(c&&c.id==="countdown"&&!S.cd.run){ return; }
+ if(c&&c.id==="snake"&&S.snake&&S.snake.alive){
+  const sn=S.snake;
+  if(k==="2"){ if(sn.dy!==1){sn.dx=0;sn.dy=-1;} return; }
+  if(k==="8"){ if(sn.dy!==-1){sn.dx=0;sn.dy=1;} return; }
+  if(k==="4"){ if(sn.dx!==1){sn.dx=-1;sn.dy=0;} return; }
+  if(k==="6"){ if(sn.dx!==-1){sn.dx=1;sn.dy=0;} return; }
+  return;
+ }
+ // menus: scroll only, no number jump
+ if(c&&(c.id==="menu"||c.id==="profiles"||c.id==="plist"||c.id==="view")){ return; }
+ if(c&&c.id==="clockbig"){ return; }
+ // standby / dialler
+ if(c&&(c.id==="standby"||c.id==="dialler")){
+  if(long){
+   if(k==="0"){ if(c.id==="standby")setScreen("dialler",{}); S.dial+="+"; return; }
+   if(k==="1"){ const vm=S.settings.vmbox; if(vm)startCall(vm); else showNote("No voice mailbox","OK",1400); return; }
+   if(k>="2"&&k<="9"){ if(!S.settings.oneTouchOn){showNote("1-touch off","OK",1000);return;}
+    const ci=S.oneTouch[k]; if(ci!=null&&S.contacts[ci])startCall(S.contacts[ci].number);
+    else showNote("Number not assigned","OK",1300); return; } // (?) text
+   if(k==="#"){ const to=S.settings.profile==="Silent"?(S.settings.prevProfile||"General"):"Silent";
+    if(S.settings.profile==="Silent"){S.settings.profile=to;S.profile=to;} else {S.settings.prevProfile=S.settings.profile;S.settings.profile="Silent";S.profile="Silent";}
+    saveAll(); showNote(S.profile==="Silent"?"Silent on":S.profile+" on","OK",1100); return; }
+   if(k==="*"){ S.keyguard=true; S.menuArmedT=0; showNote("Keypad locked","Unlock",1100); if(cur().id!=="standby")toStandby(); return; }
+   return;
+  }
+  // short
+  if(S.keyguard){
+   if(k==="*"&&Date.now()-S.menuArmedT<KEYGUARD_WINDOW_MS){ S.keyguard=false; showNote("Keypad unlocked","OK",1000); return; }
+   showLocked(); return;
+  }
+  // Menu then * lock (unlocked): * within window after Navi
+  if(k==="*"&&(c.id==="standby"||c.id==="menu")&&Date.now()-S.menuArmedT<KEYGUARD_WINDOW_MS){ S.keyguard=true; showNote("Keypad locked","Unlock",1100); toStandby(); return; }
+  if(c.id==="standby"){ setScreen("dialler",{}); S.dial=k; return; }
+  if(c.id==="dialler"){ if(S.dial.length<20)S.dial+=k; return; }
+ }
+ if(c&&(c.id==="calling"||c.id==="connected"||c.id==="incoming")){ return; }
+}
+function pressKey(k,long=false){
+ audio();
+ // flashlight works even when off
+ if(k==="FLASH"){ S.flash=!S.flash; keyBeep("NAVI"); if(S.power)pokeBacklight(); return; }
+ if(!S.power){
+  if(k==="POWER"){ if(long)powerOn(); }
+  return;
+ }
+ keyBeep(k);
+ // alarm ringing captures most keys
+ if(S.alarmRinging){
+  if(k==="NAVI")snoozeAlarm(); else if(k==="C")stopAlarm();
+  pokeBacklight(); return;
+ }
+ // keyguard capture (except power/flash/call answer)
+ const c0=cur();
+ if(S.keyguard&&c0&&!["incoming","alarmRing"].includes(c0.id)){
+  if(k==="NAVI"&&!long){ S.menuArmedT=Date.now(); showNote("Press * to unlock","Unlock",1200); pokeBacklight(); return; }
+  if(k==="*"&&!long&&Date.now()-S.menuArmedT<KEYGUARD_WINDOW_MS){ S.keyguard=false; showNote("Keypad unlocked","OK",1000); pokeBacklight(); return; }
+  if(k==="POWER"){ if(long)powerOff(); else powerShortMenuPatched(); pokeBacklight(); return; }
+  if(k==="C"||k==="UP"||k==="DOWN"||/^[0-9*#]$/.test(k)||k==="NAVI"){ if(/^[0-9*#]$/.test(k))handleDigit(k,long); else showLocked(); pokeBacklight(); return; }
+ }
+ switch(k){
+  case "NAVI":
+   if(c0&&c0.id==="standby"&&!S.keyguard)S.menuArmedT=Date.now();
+   if(c0&&c0.powerProfiles){ powerProfilePick(S.sel); break; }
+   onNavi(); break;
+  case "C": {
+   const cc=cur();
+   if(cc&&cc.id==="pin"){ pinKey("C"); break; }
+   if(cc&&cc.id==="editor"){ editorKey("C",long); break; }
+   if(cc&&cc.id==="calc"){ if(long){S.calc.expr="";S.calc.res="";} else {S.calc.expr=S.calc.expr.slice(0,-1);} break; }
+   if(cc&&cc.id==="dialler"){ if(long){ if(S.dial){S.dial="";} else toStandby(); } else { if(S.dial)S.dial=S.dial.slice(0,-1); else toStandby(); } pokeBacklight(); break; }
+   onBack(long); break; }
+  case "UP": onScroll(-1); break;
+  case "DOWN": onScroll(1); break;
+  case "POWER":
+   if(long)powerOff(); else powerShortMenuPatched();
+   break;
+  default:
+   if(/^[0-9*#]$/.test(k))handleDigit(k,long);
+ }
+ pokeBacklight();
+}
+// wrap original powerProfiles pick
+function powerShortMenuPatched(){ const c0=cur(); if(c0&&c0.powerProfiles)return; powerShortMenu(); }
+function powerProfilePick(i){
+ const items=["General","Silent","Meeting","Outdoor","Pager"];
+ if(i<5){ activateProfile(items[i]); toStandby(); }
+ else { S.flash=!S.flash; showNote(S.flash?"Torch on":"Torch off","OK",1000,()=>toStandby()); }
+}
+// patch onNavi menu branch for message Options (already in onBack) — nothing more needed
+/* ---------------- INPUT: touch + keyboard, long-press + repeat ---------------- */
+function bindHold(el,k){
+ let t=null,longFired=false,rep=null;
+ const down=(e)=>{ e.preventDefault(); audio(); el.classList.add("pressed");
+  longFired=false;
+  clearTimeout(t); clearInterval(rep);
+  if(k==="POWER"){ t=setTimeout(()=>{longFired=true;pressKey(k,true);},POWER_LONG_MS); }
+  else { t=setTimeout(()=>{longFired=true;pressKey(k,true);
+    if(k==="UP"||k==="DOWN"||k==="C"){ rep=setInterval(()=>pressKey(k,true),110); }
+   },LONG_MS);
+   if(k==="UP"||k==="DOWN"){ /* repeat only after long */ }
+  }
+ };
+ const up=(e)=>{ if(e)e.preventDefault(); el.classList.remove("pressed");
+  clearTimeout(t); clearInterval(rep);
+  if(!longFired)pressKey(k,false);
+ };
+ el.addEventListener("pointerdown",down);
+ el.addEventListener("pointerup",up);
+ el.addEventListener("pointerleave",()=>{el.classList.remove("pressed");clearTimeout(t);clearInterval(rep);});
+ el.addEventListener("contextmenu",e=>e.preventDefault());
+}
+(function buildKeypad(){
+ const kp=document.getElementById("keypad");
+ const defs=[["1","o o"],["2","ABC"],["3","DEF"],["4","GHI"],["5","JKL"],["6","MNO"],["7","PQRS"],["8","TUV"],["9","WXYZ"],["*","+"],["0","+ "],["#","_"]];
+ // Real 1100: 0 +/space, * specials, # shift — labels approx
+ defs.forEach(([d,sub])=>{ const b=document.createElement("div"); b.className="kbtn"; b.dataset.key=d;
+  b.innerHTML="<b>"+d+"</b><span>"+sub+"</span>"; kp.appendChild(b); bindHold(b,d); });
+ document.querySelectorAll("[data-key]").forEach(el=>{ if(el.classList.contains("kbtn"))return; bindHold(el,el.dataset.key); });
+ document.querySelectorAll("[data-cover]").forEach(b=>b.addEventListener("click",()=>{
+  document.getElementById("phone").className=document.getElementById("phone").className.replace(/cover-\w+/,"")+ " "+b.dataset.cover;
+ }));
+})();
+const KEYMAP={Enter:"NAVI"," ":"NAVI",Backspace:"C",Escape:"C",ArrowUp:"UP",ArrowDown:"DOWN"};
+let kbTimer=null,kbLong=false,kbKey=null,kbRep=null;
+document.addEventListener("keydown",(e)=>{
+ if(e.metaKey||e.ctrlKey||e.altKey)return;
+ let k=null;
+ if(KEYMAP[e.key]!==undefined)k=KEYMAP[e.key];
+ else if(/^[0-9*#]$/.test(e.key))k=e.key;
+ else if(e.key==="p"||e.key==="P")k="POWER";
+ else if(e.key==="f"||e.key==="F")k="FLASH";
+ else return;
+ e.preventDefault();
+ if(e.repeat){ return; } // repeat handled by our interval
+ audio();
+ kbKey=k; kbLong=false; clearTimeout(kbTimer); clearInterval(kbRep);
+ const th=(k==="POWER")?POWER_LONG_MS:LONG_MS;
+ kbTimer=setTimeout(()=>{ kbLong=true; pressKey(k,true);
+  if(k==="UP"||k==="DOWN"||k==="C")kbRep=setInterval(()=>pressKey(k,true),110);
+ },th);
+});
+document.addEventListener("keyup",(e)=>{
+ let k=null;
+ if(KEYMAP[e.key]!==undefined)k=KEYMAP[e.key];
+ else if(/^[0-9*#]$/.test(e.key))k=e.key;
+ else if(e.key==="p"||e.key==="P")k="POWER";
+ else if(e.key==="f"||e.key==="F")k="FLASH";
+ else return;
+ e.preventDefault();
+ if(k!==kbKey)return;
+ clearTimeout(kbTimer); clearInterval(kbRep);
+ if(!kbLong)pressKey(k,false);
+ kbKey=null;
+});
+// first interaction resumes audio
+document.addEventListener("pointerdown",()=>audio(),{passive:true});
+/* ---------------- DEBUG panel ---------------- */
+document.getElementById("dbgNoSim").addEventListener("change",e=>{S.noSim=e.target.checked;});
+document.getElementById("dbgOper").addEventListener("change",e=>{S.settings.operator=e.target.value||DEF_OPERATOR;saveAll();});
+document.getElementById("dbgSig").addEventListener("change",e=>{S.signal=parseInt(e.target.value);});
+document.getElementById("dbgBat").addEventListener("change",e=>{S.battery=parseInt(e.target.value);});
+document.getElementById("dbgChg").addEventListener("change",e=>{S.charging=e.target.checked;});
+document.getElementById("dbgCall").addEventListener("click",()=>{ if(!S.power){alert("Turn the phone on first (hold P)");return;} incomingCall("040 123456"); });
+document.getElementById("dbgSms").addEventListener("click",()=>{
+ if(!S.power)return;
+ S.inbox.unshift({from:"John",text:"Test message!",time:fmtClock(nowD()).s,read:false}); saveAll();
+ if(S.settings.msgTone)msgTone();
+ S.note={text:"1 message received",soft:"Show",cb:()=>{ pushScreen("menu",{title:"Inbox",items:S.inbox.map(m=>(m.read?"":"* ")+m.from)}); }};
+ clearTimeout(S.noteT); S.noteT=setTimeout(()=>{S.note=null;},6000);
+});
+document.getElementById("dbgMissed").addEventListener("click",()=>{
+ if(!S.power)return;
+ S.missed.unshift({from:"040 999",time:fmtClock(nowD()).s,new:true}); saveAll();
+ S.note={text:"1 missed call",soft:"Show",cb:()=>{ pushScreen("menu",{title:"Missed",items:S.missed.map(c=>c.from+" "+c.time)}); }};
+ clearTimeout(S.noteT); S.noteT=setTimeout(()=>{S.note=null;},6000);
+});
+document.getElementById("dbgReset").addEventListener("click",()=>{ localStorage.clear(); location.reload(); });
+(function(){ const box=document.getElementById("dbgTones");
+ Object.keys(RINGTONES).forEach(n=>{ const b=document.createElement("button"); b.textContent=n; b.onclick=()=>{audio();playSeq(RINGTONES[n],{});}; box.appendChild(b); });
+})();
+/* ---------------- boot + main loop ---------------- */
+S.profile=S.settings.profile||"General";
+S.signal=4; S.battery=4;
+S.stack=[{id:"off"}]; S.power=false;
+document.getElementById("dbgOper").value=S.settings.operator;
+setInterval(render,100); // 10fps LCD refresh is plenty for 1-bit STN
+render();
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
